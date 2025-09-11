@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grow Alpha - Podcast Platform</title>
+    
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-9PGS9WVX3K"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-9PGS9WVX3K');
+    </script>
+    
+    <script src="analytics.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .podcast { border: 1px solid #ddd; padding: 20px; margin: 20px 0; border-radius: 8px; }
+        button { padding: 10px 20px; margin: 10px 5px; cursor: pointer; border: none; border-radius: 4px; }
+        .play-btn { background-color: #4CAF50; color: white; }
+        .dive-deeper-btn { background-color: #2196F3; color: white; }
+        .play-btn:hover { background-color: #45a049; }
+        .dive-deeper-btn:hover { background-color: #1976D2; }
+        audio { width: 100%; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>Grow Alpha Podcast Platform</h1>
+    
+    <div class="podcast">
+        <h3>Episode 1: Introduction to Growth Strategies</h3>
+        <p>Learn the fundamentals of business growth in this introductory episode.</p>
+        <audio id="podcast-1" controls>
+            <source src="episode1.mp3" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
+        <br>
+        <button class="play-btn" onclick="playPodcast('podcast-1', 'Episode 1: Introduction to Growth Strategies')">Play</button>
+        <button class="dive-deeper-btn" onclick="diveDeeperClicked('Episode 1: Introduction to Growth Strategies')">Dive Deeper</button>
+    </div>
+    
+    <div class="podcast">
+        <h3>Episode 2: Market Analysis Techniques</h3>
+        <p>Deep dive into effective market analysis methods for startups.</p>
+        <audio id="podcast-2" controls>
+            <source src="episode2.mp3" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
+        <br>
+        <button class="play-btn" onclick="playPodcast('podcast-2', 'Episode 2: Market Analysis Techniques')">Play</button>
+        <button class="dive-deeper-btn" onclick="diveDeeperClicked('Episode 2: Market Analysis Techniques')">Dive Deeper</button>
+    </div>
+    
+    <div class="podcast">
+        <h3>Episode 3: Scaling Your Team</h3>
+        <p>Best practices for hiring and scaling your startup team effectively.</p>
+        <audio id="podcast-3" controls>
+            <source src="episode3.mp3" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
+        <br>
+        <button class="play-btn" onclick="playPodcast('podcast-3', 'Episode 3: Scaling Your Team')">Play</button>
+        <button class="dive-deeper-btn" onclick="diveDeeperClicked('Episode 3: Scaling Your Team')">Dive Deeper</button>
+    </div>
+</body>
+</html>
