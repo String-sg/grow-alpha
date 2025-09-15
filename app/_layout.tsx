@@ -13,6 +13,7 @@ import { DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack, usePathname, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { Platform, View } from 'react-native';
+import React from 'react';
 import 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import '../global.css';
@@ -65,6 +66,11 @@ export default function RootLayout() {
     GeistMono_500Medium,
     GeistMono_600SemiBold,
   });
+
+  // Initialize analytics when app loads
+  React.useEffect(() => {
+    initAnalytics();
+  }, []);
 
   if (!loaded) {
     // Async font loading only occurs in development.
