@@ -35,7 +35,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ onProfilePress }) 
           <Path d="M36.1367 7.8581C37.2413 7.8581 38.1367 8.75353 38.1367 9.8581C38.1367 10.9627 37.2413 11.8581 36.1367 11.8581C35.0321 11.8581 34.1367 10.9627 34.1367 9.8581C34.1367 8.75353 35.0321 7.8581 36.1367 7.8581Z" fill="#0F172A"/>
         </Svg>
         <Text style={{ fontFamily: 'GeistMono_600SemiBold' }} className="text-black text-2xl">
-          Insight
+          Grow
         </Text>
       </View>
       
