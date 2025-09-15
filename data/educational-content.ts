@@ -315,6 +315,31 @@ Watch the original video for more!`,
         publishedDate: '2025'
       }
     ]
+  },
+  {
+    id: '17',
+    title: 'Making Classrooms Autism-Friendly: Practical Tips for Teachers',
+    description: `How do Singapore teachers create classrooms where students with autism—and everyone else—can thrive? In this episode, we break down everyday tips that make a big difference, from using visual supports and chunked instructions to smart classroom setups and home-school collaboration. You'll learn to:
+
+1. Apply concrete, visual, and step-by-step strategies to cut through classroom chaos and help every learner stay on track.
+
+2. Adjust your classroom environment and tap into student interests to build confidence and participation.
+
+3. Build strong partnerships with families and stay flexible, so each child—whether on the spectrum or not—can learn in a supportive, inclusive space.`,
+    summary: `1. Structure, Visuals, and Calm Spaces: Simple tools like countdown timers, explicit instructions, visual charts, and calm-down corners help students with ASD manage classroom transitions and expectations—and make the learning environment smoother for everyone. 2. Leverage Individual Strengths, Reduce Sensory Barriers: Integrating students' special interests into class content boosts engagement and confidence, while sensory supports and flexible seating arrangements help meet individual needs. 3. Collaboration and Flexibility: Ongoing, open communication with parents and daily adaptation to students' responses are key. Small adjustments guided by observation create inclusive, effective classrooms for all learners.`,
+    category: 'Special Educational Needs',
+    author: 'DXD Product Team',
+    duration: 433659, // 7min 14s
+    imageUrl: 'https://picsum.photos/400/400?random=17',
+    audioUrl: require('../assets/audio/17_ASD.mp3'),
+    backgroundColor: 'bg-white',
+    badgeColor: 'bg-purple-200',
+    textColor: 'text-purple-900',
+    timeLeft: '7m',
+    progress: 0,
+    publishedDate: 'Today',
+    createdAt: new Date(),
+    sources: [] // TODO: Add sources when provided
   }
 ];
 

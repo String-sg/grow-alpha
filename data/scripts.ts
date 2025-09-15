@@ -316,8 +316,115 @@ Some questions to help us situate ourselves in relation to our school environmen
 3. How do we ensure post-meltdown follow-up focuses on support and learning, not just discipline?
 4. What training and peer-support structures exist so no teacher has to manage these situations alone?
 
-Remember: meltdowns are not about challenging authority, but about distress. Our job is to stay CALM, follow CASE after, and build systems that prevent crises where possible. All the best! 
+Remember: meltdowns are not about challenging authority, but about distress. Our job is to stay CALM, follow CASE after, and build systems that prevent crises where possible. All the best!
 `,
+    language: 'en'
+  },
+  {
+    podcastId: '17',
+    title: 'Making Classrooms Autism-Friendly: Practical Tips for Teachers',
+    content: `Today we're tackling something every Singapore teacher faces: how do we create classrooms that truly work for students with Autism Spectrum Disorder? With about 1 in 160 children having ASD globally, chances are you've either taught or will teach a student on the autism spectrum.
+
+But here's what might surprise you — most strategies that help students with ASD actually make learning better for everyone. So whether you're a seasoned educator or just starting out, let's explore practical tips that can transform how you think about inclusive classrooms.
+
+Let's start with those chaotic transition moments we all know too well.
+
+Picture this: it's 10:30am, English period is ending, and you need to switch to Math. Suddenly it's like a mini hurricane hit your classroom. Books flying everywhere, students chatting, chairs scraping. For most kids, it's just another part of the school day. But for a student with ASD? It can be completely overwhelming.
+
+The game-changer? Visual countdown timers. Something as simple as projecting a 5-minute warning on your smart board, followed by a 2-minute countdown. One teacher discovered this transformed not just her ASD student's experience, but the whole class became calmer during transitions.
+
+You can also use clear auditory cues — a specific song or bell sound that signals transition time. The key is consistency and advance warning.
+
+For Singapore teachers juggling packed timetables and quick subject switches, this small change can make a massive difference in classroom management.
+
+Here's what many of us get wrong: we assume kids just know how to behave appropriately.
+
+We say things like "use your indoor voice" or "sit properly" without realizing these instructions are actually quite abstract. Students with ASD often interpret language very literally, so vague instructions can leave them confused and anxious.
+
+The solution? Get visual and get specific. Instead of saying "clean up your mess," try "Please pick up your toys and put them back in your toy box" while pointing to each item. Avoid idioms like "hold your horses" or "we'll have a blast" — these can genuinely confuse ASD students.
+
+Some teachers are creating visual charts showing different voice levels:
+
+Whisper voice for library time
+Talking voice for group work
+Outdoor voice for PE
+
+Students with ASD refer to these charts constantly, and surprisingly, so do their neurotypical classmates. You can create these easily by taking photos with your phone, printing and laminating them.
+
+The physical environment matters more than we think.
+
+That prime seat by the window we thought would be perfect? It might actually be a nightmare of distractions for a student with ASD. The corridor traffic, the playground activity, the shifting shadows — all of these can pull attention away from learning.
+
+Better positioning: Central spots away from doors and windows, where students can see the teacher clearly but aren't bombarded by external stimuli. Teachers report immediate improvements in attention span when they make this simple switch.
+
+And it's not just about seating. Creating calm-down corners with cushions, fidget tools, and visual breathing exercise cards gives students a self-regulation space. The key is teaching students this isn't punishment — it's a helpful tool for when they feel overwhelmed. Interestingly, these spaces often become popular with other students too, especially after recess when some kids are still wound up.
+
+You can also use visual boundaries — labels, pictures, or even tape on the floor to mark different areas for different activities in your classroom.
+
+Let's talk about the instruction breakdown that changes everything.
+
+Instead of: "Take out your Math textbook, turn to page 45, and complete exercises 1 to 10"
+
+Try this structured approach:
+
+Step 1: Take out Math textbook (wait for compliance)
+Step 2: Turn to page 45 (wait for compliance)
+Step 3: Complete exercise 1 (check understanding)
+
+Write each step on the whiteboard as you say it. Yes, it sounds longer, but actually saves time because fewer students get confused and need clarification.
+
+This approach particularly helps students with ASD who may have difficulty processing multiple instructions simultaneously, but visual learners across the spectrum benefit too. And remember to give extra processing time — when you ask a question, try saying "Think about this for 30 seconds, then we'll share."
+
+Here's where it gets interesting: tapping into special interests can transform learning.
+
+One teacher had a student obsessed with trains. Instead of seeing this as a distraction, she incorporated train examples into Math word problems and English comprehension passages. The result? Not only did her ASD student engage more actively, but the whole class became fascinated by these train-themed lessons.
+
+The ripple effect: The student with ASD became the classroom expert on trains, boosting his confidence and social standing. His classmates started asking him questions, creating natural opportunities for peer interaction.
+
+This approach works with any special interest — dinosaurs, planets, soccer teams. The key is finding ways to weave these interests into curriculum content rather than seeing them as obstacles to learning. You might be surprised how creative you can get with incorporating Pokemon into fraction problems or using K-pop groups to teach about data collection.
+
+Sensory considerations: the hidden challenge most teachers miss.
+
+That lively morning assembly with 800 students in the hall? The fire drill sirens? Even the hum of fluorescent lights? These can be genuinely distressing for students with sensory sensitivities.
+
+Practical solutions include:
+
+Noise-muffling headphones that students can use when needed
+Alternative quiet spaces during particularly loud events
+Advance warning about sensory-heavy activities
+
+One school allows their ASD student to stay in a quiet classroom with the Learning Support Coordinator during especially noisy assemblies. The key is framing this as a helpful tool, not a punishment or exclusion.
+
+Also watch for other sensory triggers — some students are sensitive to certain textures, bright lights, or even specific smells from the canteen.
+
+The communication bridge that makes all the difference.
+
+Daily communication books shared between home and school have proven invaluable. Teachers and parents exchange brief notes about highlights of the child's day, successful strategies that worked, challenges that arose, and even joint behavior reward systems.
+
+Parents often share home strategies that work brilliantly in school too. One mother revealed her son responds better to earning privileges like extra computer time rather than tangible rewards — knowledge that transformed the teacher's classroom management approach.
+
+This collaboration helps ensure consistency between home and school, which is crucial for ASD students who thrive on predictable routines.
+
+Some practical reflections as we wrap up:
+
+Think about your current classroom setup:
+
+Could you implement visual countdown timers for transitions? Even a simple phone timer projected on screen can work wonders.
+Are your instructions concrete enough? Try the "one-step-at-a-time" approach for just one lesson and see the difference.
+Where are your ASD students sitting? Sometimes a simple seating change can dramatically improve focus and participation.
+What are your students' special interests? How might you incorporate them into next week's lessons?
+
+Remember: Every child with ASD is different. What works for one may not work for another. The key is staying flexible, observant, and willing to adapt.
+
+The bigger picture for Singapore educators
+
+Creating ASD-friendly classrooms isn't just about supporting one student — it's about developing teaching practices that benefit everyone. Clear expectations, visual supports, structured routines, and positive reinforcement are simply good pedagogy that helps all learners thrive.
+
+Many teachers report that their overall classroom management improves when they implement these autism-friendly strategies. Principals notice calmer, more focused learning environments. It's a win-win approach that aligns perfectly with Singapore's inclusive education goals.
+
+So here's your challenge: Pick one small strategy from today's conversation and try it this week. Maybe start with that visual countdown timer — it's such an easy win that can transform your transition times immediately.
+
+Thanks for joining us for this practical chat about creating inclusive classrooms. Next time, we'll explore more strategies for supporting diverse learners in Singapore schools. Until then, remember that small changes can make big differences — for your students with ASD and for everyone in your classroom.`,
     language: 'en'
   },
 ];
