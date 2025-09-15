@@ -94,7 +94,7 @@ export default function LoginScreen() {
         y,
         opacity: new Animated.Value(0),
         scale: new Animated.Value(0),
-        size: 15 + Math.random() * 25, // Random size between 15-40
+        size: 8 + Math.random() * 16, // Random size between 8-24 (smaller than 48px logo)
       };
     });
 
@@ -109,7 +109,7 @@ export default function LoginScreen() {
       const timeout = setTimeout(() => {
         // Random scale values for shrinking and growing
         const minScale = 0.3 + Math.random() * 0.4; // 0.3 to 0.7
-        const maxScale = 0.9 + Math.random() * 0.6; // 0.9 to 1.5 (reduced by 25% from 1.2-2.0)
+        const maxScale = 0.8 + Math.random() * 0.4; // 0.8 to 1.2 (ensures max star size is ~29px, well below 48px logo)
         
         // Fade in and scale up
         Animated.parallel([
@@ -167,7 +167,7 @@ export default function LoginScreen() {
               
               star.x = newX;
               star.y = newY;
-              star.size = 15 + Math.random() * 25; // New random size
+              star.size = 8 + Math.random() * 16; // New random size between 8-24
                 
                 // Continue the cycle
                 const nextTimeout = setTimeout(() => animateStar(star), Math.random() * 2000);
