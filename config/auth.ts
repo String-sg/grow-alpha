@@ -12,7 +12,7 @@ export const GOOGLE_OAUTH_CONFIG = {
   CLIENT_ID: Constants.expoConfig?.extra?.googleClientId || '',
   CLIENT_SECRET: Constants.expoConfig?.extra?.googleClientSecret || '',
   REDIRECT_URI: NODE_ENV === 'production' 
-    ? 'https://insight.string.sg/' // Your production domain
+    ? 'https://grow.string.sg/' // Your production domain
     : 'http://localhost:8081/',
 };
 
