@@ -277,7 +277,45 @@ You'll be able to:
         publishedDate: '—'
       }
     ]
-  }  
+  },
+  {
+    id: '9',
+    title: 'Learn about AI (General): From Anxiety to Agency - inspired by Prof Po-Shen\'s talk',
+    description: `AI can solve even Olympiad-level problems, but the durable edge for Singaporean educators lies in cultivating language, empathy, and critical thinking—skills that keep learning human-centered and future-ready.
+
+You'll be able to:
+1. Reframe AI anxiety into teacher agency by focusing on human strengths like care, logic, and value creation for others.
+2. Design classroom practices that preserve foundational skills—such as writing, problem-solving, and reflection—while integrating AI as a supportive tool.
+3. Implement empathy-driven learning activities that help students engage with diverse perspectives and develop resilience in an AI-saturated world.
+
+Watch the original video for more!`,
+    summary: `1. Focus on Human Strengths – Reframe AI anxiety by emphasizing uniquely human skills like care, empathy, and logical reasoning that AI cannot replicate.
+
+2. Preserve Foundational Skills – Design classroom practices that maintain core abilities like writing, problem-solving, and reflection while using AI as a supportive tool rather than a replacement.
+
+3. Build Empathy & Resilience – Implement learning activities that help students engage with diverse perspectives and develop emotional resilience for an AI-saturated world.`,
+    category: 'Artificial Intelligence',
+    author: 'Kahhow',
+    duration: 324702, // 5min 25s
+    imageUrl: 'https://picsum.photos/400/400?random=9',
+    audioUrl: require('../assets/audio/9_AI_olympiad.mp3'),
+    backgroundColor: 'bg-white',
+    badgeColor: 'bg-yellow-200',
+    textColor: 'text-yellow-900',
+    timeLeft: '5m',
+    progress: 0,
+    publishedDate: 'Today',
+    createdAt: new Date(),
+    sources: [
+      {
+        title: 'From Anxiety to Agency - Prof Po-Shen\'s talk',
+        url: 'https://www.youtube.com/watch?v=xWYb7tImErIv',
+        type: 'video',
+        author: 'Prof Po-Shen',
+        publishedDate: '2025'
+      }
+    ]
+  }
 ];
 
 export const getWeeklyProgress = () => {
