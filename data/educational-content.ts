@@ -339,7 +339,29 @@ Watch the original video for more!`,
     progress: 0,
     publishedDate: 'Today',
     createdAt: new Date(),
-    sources: [] // TODO: Add sources when provided
+    sources: [
+      {
+        title: 'Professional Practice Guidelines for Special Education',
+        url: 'https://www.moe.gov.sg/docs/default-source/document/education/special-education/files/professional-practice-guidelines',
+        type: 'article',
+        author: 'Ministry of Education, Singapore',
+        publishedDate: '2025'
+      },
+      {
+        title: 'DSM-5 Diagnostic Criteria for Autism Spectrum Disorder',
+        url: 'https://images.pearsonclinical.com/images/assets/basc-3/basc3resources/DSM5_DiagnosticCriteria_AutismSpectrumDisorder.pdf',
+        type: 'article',
+        author: 'Pearson Clinical',
+        publishedDate: '2013'
+      },
+      {
+        title: 'MOE SEND Intranet Resources',
+        url: 'http://intranet.moe.gov.sg/Send/Pages/Resources.aspx',
+        type: 'intranet',
+        author: 'MOE SEND Team',
+        publishedDate: '2025'
+      }
+    ]
   }
 ];
 
