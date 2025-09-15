@@ -1,12 +1,27 @@
-import { gtag } from 'gtag';
 import { Platform } from 'react-native';
 
 // Your GA4 Measurement ID
 const GA_MEASUREMENT_ID = 'G-9PGS9WVX3K';
 
+// Declare gtag function for TypeScript
+declare global {
+  interface Window {
+    gtag: (command: string, ...args: any[]) => void;
+    dataLayer: any[];
+  }
+}
+
 // Initialize Google Analytics (web only)
 export const initAnalytics = () => {
   if (Platform.OS === 'web' && typeof window !== 'undefined') {
+    // Initialize dataLayer
+    window.dataLayer = window.dataLayer || [];
+
+    // Define gtag function
+    window.gtag = function() {
+      window.dataLayer.push(arguments);
+    };
+
     // Load gtag script
     const script = document.createElement('script');
     script.async = true;
@@ -14,15 +29,15 @@ export const initAnalytics = () => {
     document.head.appendChild(script);
 
     // Initialize gtag
-    gtag('js', new Date());
-    gtag('config', GA_MEASUREMENT_ID);
+    window.gtag('js', new Date());
+    window.gtag('config', GA_MEASUREMENT_ID);
   }
 };
 
 // Track custom events
 export const trackEvent = (eventName: string, parameters?: Record<string, any>) => {
-  if (Platform.OS === 'web' && typeof window !== 'undefined') {
-    gtag('event', eventName, parameters);
+  if (Platform.OS === 'web' && typeof window !== 'undefined' && window.gtag) {
+    window.gtag('event', eventName, parameters);
   }
 };
 
