@@ -30,14 +30,23 @@ export const initAnalytics = () => {
 
     // Initialize gtag
     window.gtag('js', new Date());
-    window.gtag('config', GA_MEASUREMENT_ID);
+    window.gtag('config', GA_MEASUREMENT_ID, {
+      // Send page view immediately
+      send_page_view: true
+    });
+
+    // Add debug logging
+    console.log('📊 Google Analytics initialized:', GA_MEASUREMENT_ID);
   }
 };
 
 // Track custom events
 export const trackEvent = (eventName: string, parameters?: Record<string, any>) => {
   if (Platform.OS === 'web' && typeof window !== 'undefined' && window.gtag) {
+    console.log('📊 Sending GA4 event:', eventName, parameters);
     window.gtag('event', eventName, parameters);
+  } else {
+    console.warn('📊 GA4 not available - event not sent:', eventName);
   }
 };
 

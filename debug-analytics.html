@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Google Analytics 4</title>
+
+    <!-- Google Analytics 4 Debug Script -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-9PGS9WVX3K"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){
+            dataLayer.push(arguments);
+            // Debug: Log all gtag calls
+            console.log('📊 GTAG Call:', arguments);
+        }
+
+        // Enable GA4 debug mode
+        gtag('config', 'G-9PGS9WVX3K', {
+            debug_mode: true,
+            send_page_view: false // We'll send manually to track it
+        });
+
+        gtag('js', new Date());
+
+        console.log('✅ GA4 Debug Mode Initialized');
+    </script>
+
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8fafc;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .button {
+            background: #1e293b;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 8px;
+            display: block;
+            width: 100%;
+        }
+        .log {
+            background: #f1f5f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-family: monospace;
+            font-size: 14px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 6px;
+        }
+        .success { background: #dcfce7; border: 1px solid #16a34a; color: #15803d; }
+        .error { background: #fef2f2; border: 1px solid #dc2626; color: #dc2626; }
+        .info { background: #dbeafe; border: 1px solid #2563eb; color: #1d4ed8; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Debug Google Analytics 4</h1>
+        <p><strong>Measurement ID:</strong> G-9PGS9WVX3K</p>
+
+        <div id="status-check" class="status info">
+            🔄 Checking GA4 status...
+        </div>
+
+        <button class="button" onclick="testPageView()">📄 Send Page View</button>
+        <button class="button" onclick="testCustomEvent()">🎯 Send Custom Event</button>
+        <button class="button" onclick="testPodcastEvent()">🎙️ Send Podcast Play Event</button>
+        <button class="button" onclick="checkNetworkRequests()">🌐 Check Network Requests</button>
+
+        <div id="debug-log" class="log">Debug log will appear here...</div>
+
+        <h3>📋 Troubleshooting Checklist:</h3>
+        <ul id="checklist">
+            <li>✅ GA4 script loaded</li>
+            <li id="check-config">⏳ Checking configuration...</li>
+            <li id="check-dataLayer">⏳ Checking dataLayer...</li>
+            <li id="check-events">⏳ Checking event sending...</li>
+            <li id="check-network">⏳ Checking network requests...</li>
+        </ul>
+
+        <div class="status info">
+            <strong>💡 GA4 Real-time Tips:</strong><br>
+            • Events appear in GA4 Real-time within 30 seconds<br>
+            • Look for "Event count by Event name" section<br>
+            • Active users should show 1 (you) when this page is open<br>
+            • Debug mode adds extra details to events
+        </div>
+    </div>
+
+    <script>
+        const debugLog = document.getElementById('debug-log');
+        const statusCheck = document.getElementById('status-check');
+
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            debugLog.textContent += `[${timestamp}] ${message}\n`;
+            debugLog.scrollTop = debugLog.scrollHeight;
+            console.log(message);
+        }
+
+        function updateChecklist(id, status, text) {
+            const element = document.getElementById(id);
+            if (element) {
+                element.textContent = `${status} ${text}`;
+            }
+        }
+
+        // Initial checks
+        setTimeout(() => {
+            log('🚀 Starting GA4 debug session...');
+
+            // Check if gtag is loaded
+            if (typeof gtag === 'function') {
+                log('✅ gtag function is available');
+                updateChecklist('check-config', '✅', 'gtag function available');
+            } else {
+                log('❌ gtag function not found');
+                updateChecklist('check-config', '❌', 'gtag function missing');
+            }
+
+            // Check dataLayer
+            if (window.dataLayer && Array.isArray(window.dataLayer)) {
+                log(`✅ dataLayer exists with ${window.dataLayer.length} items`);
+                updateChecklist('check-dataLayer', '✅', `dataLayer has ${window.dataLayer.length} items`);
+                log('📊 DataLayer contents:', JSON.stringify(window.dataLayer, null, 2));
+            } else {
+                log('❌ dataLayer not found or invalid');
+                updateChecklist('check-dataLayer', '❌', 'dataLayer missing');
+            }
+
+            statusCheck.className = 'status success';
+            statusCheck.textContent = '✅ GA4 Debug mode active - Check console for detailed logs';
+        }, 1000);
+
+        function testPageView() {
+            log('📄 Sending page_view event...');
+            gtag('event', 'page_view', {
+                page_title: 'GA4 Debug Page',
+                page_location: window.location.href,
+                custom_parameter: 'debug_test'
+            });
+            updateChecklist('check-events', '✅', 'Page view event sent');
+        }
+
+        function testCustomEvent() {
+            log('🎯 Sending custom test event...');
+            gtag('event', 'debug_test_event', {
+                debug_mode: true,
+                timestamp: new Date().toISOString(),
+                user_agent: navigator.userAgent.substring(0, 50)
+            });
+            log('✅ Custom event sent');
+        }
+
+        function testPodcastEvent() {
+            log('🎙️ Sending podcast_play event...');
+            gtag('event', 'podcast_play', {
+                podcast_id: 'debug_test_podcast',
+                podcast_title: 'Debug Test Podcast',
+                category: 'Testing',
+                debug_session: true
+            });
+            log('✅ Podcast play event sent');
+        }
+
+        function checkNetworkRequests() {
+            log('🌐 To check network requests:');
+            log('1. Open Developer Tools (F12)');
+            log('2. Go to Network tab');
+            log('3. Filter by "google-analytics" or "googletagmanager"');
+            log('4. Click any test button above');
+            log('5. Look for POST requests to /collect or /g/collect');
+            updateChecklist('check-network', '📋', 'Instructions provided - check DevTools Network tab');
+        }
+
+        // Monitor dataLayer changes
+        const originalPush = window.dataLayer.push;
+        window.dataLayer.push = function() {
+            log(`📊 DataLayer push: ${JSON.stringify(arguments[0])}`);
+            return originalPush.apply(this, arguments);
+        };
+
+        // Send initial page view
+        setTimeout(() => {
+            log('🏠 Sending initial page view...');
+            testPageView();
+        }, 2000);
+    </script>
+</body>
+</html>
