@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Analytics 4 Live Test</title>
+
+    <!-- Google Analytics 4 Script -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-9PGS9WVX3K"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-9PGS9WVX3K');
+
+        console.log('✅ Google Analytics 4 initialized with ID: G-9PGS9WVX3K');
+    </script>
+
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8fafc;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .button {
+            background: #1e293b;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 8px 4px;
+            transition: background 0.2s;
+        }
+        .button:hover {
+            background: #334155;
+        }
+        .status {
+            background: #f1f5f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-family: monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+        }
+        .success { border-left: 4px solid #10b981; }
+        .info { border-left: 4px solid #3b82f6; }
+        h1 { color: #1e293b; }
+        h2 { color: #475569; margin-top: 30px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Google Analytics 4 Live Test</h1>
+        <p>This page tests if your GA4 tracking is working correctly. Events will be sent to measurement ID: <strong>G-9PGS9WVX3K</strong></p>
+
+        <h2>📊 Test Analytics Events</h2>
+        <p>Click the buttons below to send test events to Google Analytics:</p>
+
+        <button class="button" onclick="testPageView()">📄 Test Page View</button>
+        <button class="button" onclick="testPodcastPlay()">▶️ Test Podcast Play</button>
+        <button class="button" onclick="testDiveDeeper()">🎯 Test Dive Deeper</button>
+        <button class="button" onclick="testQuizAttempt()">🧠 Test Quiz Attempt</button>
+        <button class="button" onclick="testPodcastComplete()">🏁 Test Podcast Complete</button>
+
+        <div id="status" class="status info">
+✅ Google Analytics 4 loaded successfully
+📊 Ready to send test events
+⏱️ Events will appear in GA4 Real-time within 30 seconds
+        </div>
+
+        <h2>🔍 How to Verify</h2>
+        <ol>
+            <li>Click the test buttons above</li>
+            <li>Go to <a href="https://analytics.google.com/" target="_blank">Google Analytics</a></li>
+            <li>Select your property with ID: G-9PGS9WVX3K</li>
+            <li>Go to <strong>Reports → Real-time</strong></li>
+            <li>Look for events in the "Event count by Event name" section</li>
+        </ol>
+
+        <h2>📱 Real App Events</h2>
+        <p>Your podcast app at <a href="http://localhost:3000" target="_blank">localhost:3000</a> should also be sending these events:</p>
+        <ul>
+            <li><strong>dive_deeper_click</strong> - When users click quiz buttons</li>
+            <li><strong>dive_deeper_action</strong> - When users click Script/Sources</li>
+            <li><strong>podcast_play</strong> - When users play podcasts</li>
+            <li><strong>podcast_progress</strong> - At 80% completion</li>
+            <li><strong>podcast_complete</strong> - At 100% completion</li>
+            <li><strong>quiz_attempt</strong> - When users start quizzes</li>
+            <li><strong>quiz_complete</strong> - When users finish quizzes</li>
+        </ul>
+    </div>
+
+    <script>
+        const status = document.getElementById('status');
+
+        function updateStatus(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            status.textContent += `\n[${timestamp}] ${message}`;
+            status.scrollTop = status.scrollHeight;
+        }
+
+        function testPageView() {
+            gtag('event', 'page_view', {
+                page_title: 'Analytics Test Page',
+                page_location: window.location.href
+            });
+            updateStatus('✅ Sent: page_view event');
+            console.log('📊 Sent page_view event');
+        }
+
+        function testPodcastPlay() {
+            gtag('event', 'podcast_play', {
+                podcast_id: 'test_podcast_1',
+                podcast_title: 'Test Podcast Episode',
+                category: 'Education'
+            });
+            updateStatus('✅ Sent: podcast_play event');
+            console.log('📊 Sent podcast_play event');
+        }
+
+        function testDiveDeeper() {
+            gtag('event', 'dive_deeper_click', {
+                podcast_id: 'test_podcast_1',
+                podcast_title: 'Test Podcast Episode'
+            });
+            updateStatus('✅ Sent: dive_deeper_click event');
+            console.log('📊 Sent dive_deeper_click event');
+        }
+
+        function testQuizAttempt() {
+            gtag('event', 'quiz_attempt', {
+                podcast_id: 'test_podcast_1',
+                podcast_title: 'Test Podcast Episode',
+                attempt_number: 1
+            });
+            updateStatus('✅ Sent: quiz_attempt event');
+            console.log('📊 Sent quiz_attempt event');
+        }
+
+        function testPodcastComplete() {
+            gtag('event', 'podcast_complete', {
+                podcast_id: 'test_podcast_1',
+                podcast_title: 'Test Podcast Episode',
+                duration_minutes: 30
+            });
+            updateStatus('✅ Sent: podcast_complete event');
+            console.log('📊 Sent podcast_complete event');
+        }
+
+        // Send initial page view
+        setTimeout(() => {
+            testPageView();
+            updateStatus('🚀 Page loaded - automatic page_view sent');
+        }, 1000);
+    </script>
+</body>
+</html>
