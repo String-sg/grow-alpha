@@ -23,6 +23,7 @@ import { AudioProvider } from '@/contexts/AudioContext';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { ChatProvider } from '@/contexts/ChatContext';
 import { NotesProvider } from '@/contexts/NotesContext';
+import { initAnalytics } from '@/utils/analytics';
 
 function AppContent() {
   const pathname = usePathname();
