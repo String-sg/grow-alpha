@@ -13,6 +13,7 @@ import { mockQuizzes } from '@/data/quizzes';
 import { getScriptByPodcastId } from '@/data/scripts';
 import { useAudio } from '@/hooks/useAudio';
 import { Note } from '@/types/notes';
+import { analytics } from '@/utils/analytics';
 import { getFeedbackFormUrl } from '@/utils/feedback';
 import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { FileText, Lightbulb, Pause, Play, ScrollText, ThumbsDown, ThumbsUp } from 'lucide-react-native';
@@ -211,6 +212,9 @@ export default function PodcastDetailsScreen() {
   const handlePlayPress = async () => {
     if (!content) return;
 
+    // Track podcast play event
+    analytics.trackPodcastPlay(content.id, content.title, content.category);
+
     // Convert EducationalContent to Podcast format for audio system
     const podcastFormat = {
       id: content.id,
@@ -228,6 +232,10 @@ export default function PodcastDetailsScreen() {
 
   const handleQuizPress = () => {
     if (!content) return;
+
+    // Track dive deeper click
+    analytics.trackDiveDeeperClick(content.id, content.title);
+
     const quiz = mockQuizzes.find(q => q.podcastId === content.id);
     if (quiz) {
       router.push({
@@ -624,8 +632,11 @@ export default function PodcastDetailsScreen() {
               {/* Script/Source Buttons */}
               <View className="flex-row gap-3">
                 {/* Script Button */}
-                <TouchableOpacity 
-                  onPress={() => setShowScriptSheet(true)}
+                <TouchableOpacity
+                  onPress={() => {
+                    analytics.trackDiveDeeperAction('view_script', content?.id || '', content?.title || '');
+                    setShowScriptSheet(true);
+                  }}
                   className="px-4 py-3 rounded-full flex-row items-center gap-2"
                   style={{
                     backgroundColor: topicColors.lightHex,
@@ -636,8 +647,11 @@ export default function PodcastDetailsScreen() {
                 </TouchableOpacity>
                 
                 {/* Source Button */}
-                <TouchableOpacity 
-                  onPress={() => setShowSourceSheet(true)}
+                <TouchableOpacity
+                  onPress={() => {
+                    analytics.trackDiveDeeperAction('view_sources', content?.id || '', content?.title || '');
+                    setShowSourceSheet(true);
+                  }}
                   className="px-4 py-3 rounded-full flex-row items-center gap-2"
                   style={{
                     backgroundColor: topicColors.lightHex,

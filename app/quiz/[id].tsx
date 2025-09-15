@@ -11,6 +11,7 @@ import {
   QuizProgress,
   QuizResult
 } from '@/types/quiz';
+import { analytics } from '@/utils/analytics';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -50,6 +51,13 @@ export default function QuizScreen() {
       }
 
       // Quizzes are always available - no unlock check needed
+
+      // Get attempt number for this quiz
+      const existingAttempts = await getQuizAttempts(foundQuiz.id);
+      const attemptNumber = existingAttempts.length + 1;
+
+      // Track quiz attempt
+      analytics.trackQuizAttempt(foundQuiz.podcastId, foundQuiz.title, attemptNumber);
 
       setQuiz(foundQuiz);
       setIsLoading(false);
@@ -149,9 +157,16 @@ export default function QuizScreen() {
         feedback: generateFeedback(scorePercentage)
       };
 
+      // Get attempt number for analytics
+      const existingAttempts = await getQuizAttempts(quiz.id);
+      const attemptNumber = existingAttempts.length + 1;
+
+      // Track quiz completion
+      analytics.trackQuizComplete(quiz.podcastId, scorePercentage, scorePercentage >= 70, attemptNumber);
+
       // Save attempt
       await saveQuizAttempt(attempt);
-      
+
       // Update progress
       await updateQuizProgress(quiz.id, scorePercentage);
 
@@ -166,6 +181,17 @@ export default function QuizScreen() {
     } catch (error) {
       console.error('Error finishing quiz:', error);
       Alert.alert('Error', 'Failed to save quiz results');
+    }
+  };
+
+  const getQuizAttempts = async (quizId: string): Promise<QuizAttempt[]> => {
+    try {
+      const existingData = await AsyncStorage.getItem(QUIZ_STORAGE_KEY);
+      const attempts: QuizAttempt[] = existingData ? JSON.parse(existingData) : [];
+      return attempts.filter(attempt => attempt.quizId === quizId);
+    } catch (error) {
+      console.error('Error getting quiz attempts:', error);
+      return [];
     }
   };
 

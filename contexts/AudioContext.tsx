@@ -1,6 +1,7 @@
 import { mockQuizzes } from '@/data/quizzes';
 import { Episode, PlaybackState, Podcast } from '@/types/podcast';
 import { QuizProgress } from '@/types/quiz';
+import { analytics } from '@/utils/analytics';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Audio } from 'expo-av';
 import React, { createContext, ReactNode, useContext, useEffect, useReducer, useRef } from 'react';
@@ -122,6 +123,7 @@ export function AudioProvider({ children }: AudioProviderProps) {
   const isSeekingRef = useRef(false);
   const soundRef = useRef<Audio.Sound | null>(null);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const completionTrackedRef = useRef<Set<string>>(new Set()); // Track which podcasts have had completion events fired
   
   // Update progress from sound status
   const updateProgress = (status: any) => {
@@ -130,6 +132,24 @@ export function AudioProvider({ children }: AudioProviderProps) {
       dispatch({ type: 'SET_DURATION', payload: status.durationMillis || 0 });
       dispatch({ type: 'SET_PLAYING', payload: status.isPlaying || false });
       dispatch({ type: 'SET_BUFFERING', payload: status.isBuffering || false });
+
+      // Track podcast completion at 80% and 100%
+      if (status.durationMillis > 0 && state.currentPodcast) {
+        const progressPercentage = (status.positionMillis / status.durationMillis) * 100;
+        const podcastId = state.currentPodcast.id;
+
+        // Track 80% completion (for quiz unlocking)
+        if (progressPercentage >= 80 && !completionTrackedRef.current.has(`${podcastId}_80`)) {
+          completionTrackedRef.current.add(`${podcastId}_80`);
+          analytics.trackPodcastProgress(podcastId, 80);
+        }
+
+        // Track 100% completion
+        if (progressPercentage >= 100 && !completionTrackedRef.current.has(`${podcastId}_100`)) {
+          completionTrackedRef.current.add(`${podcastId}_100`);
+          analytics.trackPodcastComplete(podcastId, state.currentPodcast.title, status.durationMillis / 1000);
+        }
+      }
     }
   };
 
@@ -357,6 +377,10 @@ export function AudioProvider({ children }: AudioProviderProps) {
       
       soundRef.current = sound;
       dispatch({ type: 'SET_SOUND', payload: sound });
+
+      // Reset completion tracking for new podcast
+      completionTrackedRef.current.clear();
+
       dispatch({ type: 'SET_CURRENT_PODCAST', payload: podcast });
       dispatch({ type: 'SET_CURRENT_EPISODE', payload: episode || null });
 

@@ -1,6 +1,7 @@
 import { formatDuration } from '@/data/podcasts';
 import { useAudio } from '@/hooks/useAudio';
 import { Podcast } from '@/types/podcast';
+import { analytics } from '@/utils/analytics';
 import React from 'react';
 import { ActivityIndicator, Image, Text, TouchableOpacity, View } from 'react-native';
 import { Icon } from './Icon';
@@ -31,10 +32,12 @@ export const PodcastCard: React.FC<PodcastCardProps> = ({
 
   const handlePlayPress = async (e: any) => {
     e.stopPropagation(); // Prevent triggering onPress
-    
+
     if (isThisPodcastCurrent) {
       await togglePlayPause();
     } else {
+      // Track podcast play event
+      analytics.trackPodcastPlay(podcast.id, podcast.title, podcast.category || 'Unknown');
       await playContent(podcast);
     }
   };
