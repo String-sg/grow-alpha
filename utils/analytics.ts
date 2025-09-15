@@ -1,8 +1,8 @@
 import { gtag } from 'gtag';
 import { Platform } from 'react-native';
 
-// Replace with your actual GA4 Measurement ID
-const GA_MEASUREMENT_ID = 'G-XXXXXXXXXX'; // TODO: Replace with your actual ID
+// Your GA4 Measurement ID
+const GA_MEASUREMENT_ID = 'G-9PGS9WVX3K';
 
 // Initialize Google Analytics (web only)
 export const initAnalytics = () => {

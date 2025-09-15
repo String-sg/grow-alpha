@@ -184,6 +184,17 @@ export default function QuizScreen() {
     }
   };
 
+  const getQuizAttempts = async (quizId: string): Promise<QuizAttempt[]> => {
+    try {
+      const existingData = await AsyncStorage.getItem(QUIZ_STORAGE_KEY);
+      const attempts: QuizAttempt[] = existingData ? JSON.parse(existingData) : [];
+      return attempts.filter(attempt => attempt.quizId === quizId);
+    } catch (error) {
+      console.error('Error getting quiz attempts:', error);
+      return [];
+    }
+  };
+
   const saveQuizAttempt = async (attempt: QuizAttempt) => {
     try {
       const existingData = await AsyncStorage.getItem(QUIZ_STORAGE_KEY);
