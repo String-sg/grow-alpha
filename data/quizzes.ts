@@ -50,5 +50,51 @@ export const mockQuizzes: Quiz[] = [
         explanation: 'The podcast specifically recommends seating students with attention difficulties at the front of the classroom, away from high-traffic areas and distractions like the pencil sharpener or classroom door.'
       }
     ]
+  },
+  {
+    id: 'quiz-10',
+    podcastId: '10', // Learn to Use AI: More Consistent & Controlled Image Generation with JSON Formatting
+    title: 'AI Image Generation with JSON Quiz',
+    description: 'Test your understanding of using JSON style guides for consistent and controlled AI image generation in educational contexts.',
+    durationThreshold: 0.8, // 80% listening required
+    estimatedTime: 5,
+    questions: [
+      {
+        id: 'q10-1',
+        question: 'What is the main benefit of using JSON style guides for AI image generation in education?',
+        difficulty: 'easy',
+        options: [
+          { id: 'opt1-1', text: 'It makes images load faster on school computers', isCorrect: false },
+          { id: 'opt1-2', text: 'It allows teachers to lock key visual elements for consistency across lessons', isCorrect: true },
+          { id: 'opt1-3', text: 'It reduces the cost of generating AI images', isCorrect: false },
+          { id: 'opt1-4', text: 'It automatically creates better quality images', isCorrect: false }
+        ],
+        explanation: 'JSON style guides help teachers maintain consistency by locking in core design elements like style, camera angle, and color palette, ensuring visual coherence across all teaching materials and reducing student distractions.'
+      },
+      {
+        id: 'q10-2',
+        question: 'According to the podcast, what should teachers differentiate between when creating JSON prompts?',
+        difficulty: 'medium',
+        options: [
+          { id: 'opt2-1', text: 'Free and paid AI image generation tools', isCorrect: false },
+          { id: 'opt2-2', text: 'Simple and complex image requests', isCorrect: false },
+          { id: 'opt2-3', text: 'Fixed and variable fields in prompts', isCorrect: true },
+          { id: 'opt2-4', text: 'Individual and team-generated images', isCorrect: false }
+        ],
+        explanation: 'The key is to differentiate between fixed fields (consistent visual elements like style and colors) and variable fields (lesson-specific content), so only the content changes while the overall visual design remains coherent.'
+      },
+      {
+        id: 'q10-3',
+        question: 'How does implementing a JSON-based workflow help with team collaboration in schools?',
+        difficulty: 'medium',
+        options: [
+          { id: 'opt3-1', text: 'It speeds up the image generation process', isCorrect: false },
+          { id: 'opt3-2', text: 'It allows multiple teachers to generate visuals that align with department branding', isCorrect: true },
+          { id: 'opt3-3', text: 'It reduces the number of images needed per lesson', isCorrect: false },
+          { id: 'opt3-4', text: 'It eliminates the need for design skills', isCorrect: false }
+        ],
+        explanation: 'A practical JSON workflow enables teams to create visuals that consistently align with department or school branding, making it easier for students to recognize and follow materials across different classes and teachers.'
+      }
+    ]
   }
 ];
