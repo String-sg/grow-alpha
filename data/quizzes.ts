@@ -188,5 +188,51 @@ export const mockQuizzes: Quiz[] = [
         explanation: 'The podcast emphasizes "Remember, you\'re not aiming for chart-toppers. You\'re aiming for hooks that lodge in memory." The goal is educational retention, not musical perfection, with AI doing the creative heavy lifting while teachers focus on concepts.'
       }
     ]
+  },
+  {
+    id: 'quiz-3',
+    podcastId: '3', // Supporting Students with Dyslexia: What Every Teacher Needs to Know
+    title: 'Supporting Students with Dyslexia Quiz',
+    description: 'Test your understanding of dyslexia, brain research findings, and effective strategies for supporting students with reading differences in the classroom.',
+    durationThreshold: 0.8, // 80% listening required
+    estimatedTime: 5,
+    questions: [
+      {
+        id: 'q3-1',
+        question: 'What is the biggest myth about dyslexia according to the podcast?',
+        difficulty: 'easy',
+        options: [
+          { id: 'opt1-1', text: 'Dyslexia affects up to one in five people', isCorrect: false },
+          { id: 'opt1-2', text: 'Students with dyslexia see letters backwards', isCorrect: true },
+          { id: 'opt1-3', text: 'Dyslexia runs in families', isCorrect: false },
+          { id: 'opt1-4', text: 'Students with dyslexia need more explicit instruction', isCorrect: false }
+        ],
+        explanation: 'The podcast emphasizes that "Students with dyslexia see things exactly the same way we do. The real issue is phonological processing - they have trouble manipulating the sounds in language," not visual perception problems.'
+      },
+      {
+        id: 'q3-2',
+        question: 'According to brain research mentioned in the podcast, what happens when students with dyslexia receive intensive, multi-sensory phonics instruction?',
+        difficulty: 'medium',
+        options: [
+          { id: 'opt2-1', text: 'They develop enhanced visual-spatial skills', isCorrect: false },
+          { id: 'opt2-2', text: 'Their brains start using the left hemisphere more efficiently, like typical readers', isCorrect: true },
+          { id: 'opt2-3', text: 'They become better at solving complex problems orally', isCorrect: false },
+          { id: 'opt2-4', text: 'Their executive function improves automatically', isCorrect: false }
+        ],
+        explanation: 'The podcast states that "when students get this kind of systematic instruction, brain imaging actually shows their brains starting to use the left hemisphere more efficiently, just like typical readers," demonstrating the brain\'s ability to rewire itself.'
+      },
+      {
+        id: 'q3-3',
+        question: 'What does the concept of "neurodiversity" mean in relation to dyslexia according to the podcast?',
+        difficulty: 'medium',
+        options: [
+          { id: 'opt3-1', text: 'Dyslexia is a serious disorder that needs to be cured', isCorrect: false },
+          { id: 'opt3-2', text: 'All students learn exactly the same way', isCorrect: false },
+          { id: 'opt3-3', text: 'Dyslexia is a neurobiological variation with both challenges and unique strengths', isCorrect: true },
+          { id: 'opt3-4', text: 'Students with dyslexia should be taught separately from other students', isCorrect: false }
+        ],
+        explanation: 'The podcast explains that "Instead of seeing dyslexia as a disorder, we can understand it as a neurobiological variation. These students\' brains work differently, and while that creates challenges with reading, it can also lead to unique strengths" like enhanced visual-spatial skills.'
+      }
+    ]
   }
 ];
