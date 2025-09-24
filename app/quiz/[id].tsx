@@ -3,7 +3,9 @@ import { BottomSheet } from '@/components/BottomSheet';
 import { Icon } from '@/components/Icon';
 import { QuizQuestion } from '@/components/QuizQuestion';
 import { useAudioContext } from '@/contexts/AudioContext';
+import { useMLU } from '@/contexts/MLUContext';
 import { mockQuizzes } from '@/data/quizzes';
+import { mockPodcasts } from '@/data/podcasts';
 import {
   Quiz,
   QuizAnswer,
@@ -31,6 +33,7 @@ const QUIZ_PROGRESS_KEY = 'quiz_progress';
 export default function QuizScreen() {
   const { id, podcastId } = useLocalSearchParams<{ id: string; podcastId?: string }>();
   const { currentPodcast } = useAudioContext();
+  const { incrementCompletedMLUs } = useMLU();
   const [quiz, setQuiz] = useState<Quiz | null>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<QuizAnswer[]>([]);
@@ -169,6 +172,14 @@ export default function QuizScreen() {
 
       // Update progress
       await updateQuizProgress(quiz.id, scorePercentage);
+
+      // Increment MLU completion counter for successful completion
+      if (scorePercentage >= 70) {
+        // Get actual podcast title from podcast data
+        const podcast = mockPodcasts.find(p => p.id === quiz.podcastId);
+        const podcastTitle = podcast?.title || 'Unknown Podcast';
+        incrementCompletedMLUs(quiz.podcastId, podcastTitle, quiz.id, scorePercentage);
+      }
 
       // Navigate to results
       router.push({

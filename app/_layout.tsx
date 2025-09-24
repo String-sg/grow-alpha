@@ -23,6 +23,7 @@ import { MiniPlayer } from '@/components/MiniPlayer';
 import { AudioProvider } from '@/contexts/AudioContext';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { ChatProvider } from '@/contexts/ChatContext';
+import { MLUProvider } from '@/contexts/MLUContext';
 import { NotesProvider } from '@/contexts/NotesContext';
 import { initAnalytics } from '@/utils/analytics';
 
@@ -81,11 +82,13 @@ export default function RootLayout() {
     <SafeAreaProvider className={Platform.OS === 'web' ? "h-dvh" : undefined}>
       <AuthProvider>
         <AudioProvider>
-          <NotesProvider>
-            <ChatProvider>
-              <AppContent />
-            </ChatProvider>
-          </NotesProvider>
+          <MLUProvider>
+            <NotesProvider>
+              <ChatProvider>
+                <AppContent />
+              </ChatProvider>
+            </NotesProvider>
+          </MLUProvider>
         </AudioProvider>
       </AuthProvider>
     </SafeAreaProvider>
