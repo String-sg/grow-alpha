@@ -142,5 +142,51 @@ export const mockQuizzes: Quiz[] = [
         explanation: 'The podcast emphasizes that "awareness beats fear, and in classrooms, critical thinking is the best defense." It clarifies that AI tools remain safe when used responsibly, and perfect security isn\'t required - just awareness and good practices.'
       }
     ]
+  },
+  {
+    id: 'quiz-15',
+    podcastId: '15', // Learn to use AI: creating songs to help students' remember, inspired by Eugene Teo (SJI)
+    title: 'AI Educational Songs Quiz',
+    description: 'Test your understanding of using AI tools to create educational songs and how music can enhance memory and learning retention.',
+    durationThreshold: 0.8, // 80% listening required
+    estimatedTime: 5,
+    questions: [
+      {
+        id: 'q15-1',
+        question: 'What are the two AI music generation tools specifically mentioned in the podcast for creating educational songs?',
+        difficulty: 'easy',
+        options: [
+          { id: 'opt1-1', text: 'ChatGPT and NotebookLM', isCorrect: false },
+          { id: 'opt1-2', text: 'Suno and Udio', isCorrect: true },
+          { id: 'opt1-3', text: 'Spotify and YouTube', isCorrect: false },
+          { id: 'opt1-4', text: 'Google Docs and Markdown', isCorrect: false }
+        ],
+        explanation: 'The podcast specifically mentions Suno and Udio as AI music generators where you can paste lyrics, choose a style like "lofi hip hop" or "acoustic pop," and generate full songs with vocals.'
+      },
+      {
+        id: 'q15-2',
+        question: 'According to the podcast, what is Targeted Memory Reactivation (TMR) and how does it relate to educational songs?',
+        difficulty: 'medium',
+        options: [
+          { id: 'opt2-1', text: 'A technique for making songs more catchy and memorable', isCorrect: false },
+          { id: 'opt2-2', text: 'Research showing that re-exposure to sounds linked to learning during deep sleep can improve recall', isCorrect: true },
+          { id: 'opt2-3', text: 'A method for creating better lyrics using AI prompts', isCorrect: false },
+          { id: 'opt2-4', text: 'A way to measure how well students remember song lyrics', isCorrect: false }
+        ],
+        explanation: 'TMR research shows that when students are re-exposed to sounds linked to what they learned earlier, during deep sleep, recall improves. This is why playing Chemistry-themed lofi tracks while sleeping could help consolidate learning.'
+      },
+      {
+        id: 'q15-3',
+        question: 'What is the main goal when creating educational songs with AI according to the podcast?',
+        difficulty: 'medium',
+        options: [
+          { id: 'opt3-1', text: 'To create chart-topping hits that will make the school famous', isCorrect: false },
+          { id: 'opt3-2', text: 'To replace traditional teaching methods entirely', isCorrect: false },
+          { id: 'opt3-3', text: 'To create hooks that lodge in memory, not chart-toppers', isCorrect: true },
+          { id: 'opt3-4', text: 'To demonstrate advanced technical skills with AI tools', isCorrect: false }
+        ],
+        explanation: 'The podcast emphasizes "Remember, you\'re not aiming for chart-toppers. You\'re aiming for hooks that lodge in memory." The goal is educational retention, not musical perfection, with AI doing the creative heavy lifting while teachers focus on concepts.'
+      }
+    ]
   }
 ];
