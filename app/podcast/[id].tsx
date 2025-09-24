@@ -664,29 +664,28 @@ export default function PodcastDetailsScreen() {
             </View>
           </View>
 
-          {/* Add Notes Section */}
+          {/* Add Notes Section - COMMENTED OUT */}
+          {/*
           <View className="px-6 mt-8 mb-8">
             <Text className="text-black text-base font-medium mb-4 px-1">
               Add notes
             </Text>
-            
-            {/* Responsive Grid Container */}
+
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginHorizontal: -noteGap/2 }}>
-              {/* Existing Notes */}
               {notes.slice(0, 3).map((note, index) => {
                 const animatedStyle = index === 0 ? note1AnimatedStyle :
                                     index === 1 ? note2AnimatedStyle :
                                     note3AnimatedStyle;
-                
+
                 return (
                   <View key={note.id} style={{ paddingHorizontal: noteGap/2, marginBottom: noteGap }}>
-                    <TouchableOpacity 
-                      className="relative" 
+                    <TouchableOpacity
+                      className="relative"
                       style={{ width: noteCardWidth, height: noteCardHeight }}
                       activeOpacity={0.8}
                       onPress={() => handleNotePress(note.id, index)}
                     >
-                      <View 
+                      <View
                         className={`${topicColors.badge} rounded-3xl p-4 w-full h-full justify-between`}
                       >
                         <Text className="text-slate-600 text-xs">{formatNoteDate(note.createdAt)}</Text>
@@ -699,12 +698,9 @@ export default function PodcastDetailsScreen() {
                 );
               })}
 
-
-
-              {/* Notion Card - Primary */}
               <View style={{ paddingHorizontal: noteGap/2, marginBottom: noteGap }}>
-                <TouchableOpacity 
-                  className="relative" 
+                <TouchableOpacity
+                  className="relative"
                   style={{ width: noteCardWidth, height: noteCardHeight }}
                   activeOpacity={0.7}
                   onPress={() => {
@@ -715,7 +711,7 @@ export default function PodcastDetailsScreen() {
                     }
                   }}
                 >
-                  <View 
+                  <View
                     className="bg-gradient-to-br from-blue-50 to-purple-50 border border-blue-200 rounded-3xl p-4 w-full h-full justify-between"
                   >
                     <View className="bg-blue-100 rounded-full p-2 self-start">
@@ -728,10 +724,9 @@ export default function PodcastDetailsScreen() {
                 </TouchableOpacity>
               </View>
 
-              {/* Google Docs Card - Secondary */}
               <View style={{ paddingHorizontal: noteGap/2, marginBottom: noteGap }}>
-                <TouchableOpacity 
-                  className="relative" 
+                <TouchableOpacity
+                  className="relative"
                   style={{ width: noteCardWidth, height: noteCardHeight }}
                   activeOpacity={0.7}
                   onPress={() => {
@@ -742,7 +737,7 @@ export default function PodcastDetailsScreen() {
                     }
                   }}
                 >
-                  <View 
+                  <View
                     className="bg-slate-50 border border-slate-200 rounded-3xl p-4 w-full h-full justify-between"
                   >
                     <View className="bg-slate-200 rounded-full p-2 self-start">
@@ -756,6 +751,7 @@ export default function PodcastDetailsScreen() {
               </View>
             </View>
           </View>
+          */}
 
           {/* Next Steps Section */}
           <View className="px-6 mt-8 mb-8">

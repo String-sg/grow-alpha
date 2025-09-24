@@ -1,4 +1,4 @@
-# Insight (alpha)
+# Glow (alpha)
 _Previously known as Onward during GovTech Build Hackathon_
 <br>
 This repo is created for the purpose of building a prototype and test and present the idea faster to the hand of users and stakeholders. The prototype is made to look and feel as close as possible with the vision we wanted to achieve. You can install the app as PWA by adding it to your homescreen. This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
