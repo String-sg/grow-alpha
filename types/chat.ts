@@ -32,7 +32,7 @@ export interface ChatContextState {
 }
 
 export interface ChatContextActions {
-  sendMessage: (content: string, context?: string) => Promise<void>;
+  sendMessage: (content: string, context?: string, geminiContext?: any) => Promise<void>;
   createNewSession: () => void;
   loadSession: (sessionId: string) => void;
   clearCurrentSession: () => void;

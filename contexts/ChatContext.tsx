@@ -2,6 +2,7 @@ import React, { createContext, useContext, useReducer, useEffect, ReactNode } fr
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ChatContextType, ChatMessage, ChatSession, ChatUser } from '@/types/chat';
 import { defaultSession, aiUser, humanUser, getRandomAIResponse } from '@/data/chat';
+import { geminiService, ChatContext as GeminiChatContext } from '@/services/geminiService';
 
 interface ChatState {
   currentSession: ChatSession | null;
@@ -153,7 +154,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
     return `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   };
 
-  const sendMessage = async (content: string, context?: string): Promise<void> => {
+  const sendMessage = async (content: string, context?: string, geminiContext?: GeminiChatContext): Promise<void> => {
     if (!state.currentSession || !content.trim()) return;
 
     // Create user message
@@ -169,7 +170,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
 
     // Add user message
     dispatch({ type: 'ADD_MESSAGE', payload: userMessage });
-    
+
     // Update message status to sent
     setTimeout(() => {
       dispatch({ type: 'UPDATE_MESSAGE_STATUS', payload: { messageId: userMessage.id, status: 'sent' } });
@@ -178,14 +179,30 @@ export function ChatProvider({ children }: ChatProviderProps) {
     // Show typing indicator
     dispatch({ type: 'SET_TYPING', payload: true });
 
-    // Simulate AI response delay
-    const responseDelay = 1000 + Math.random() * 2000; // 1-3 seconds
-    
-    setTimeout(() => {
+    try {
+      // Get AI response from Gemini
+      const aiResponseText = await geminiService.sendMessage(content.trim(), geminiContext);
+
       dispatch({ type: 'SET_TYPING', payload: false });
-      
+
       // Generate AI response
       const aiResponse: ChatMessage = {
+        id: generateMessageId(),
+        content: aiResponseText,
+        userId: aiUser.id,
+        timestamp: new Date(),
+        type: 'text',
+        status: 'delivered',
+        context: context,
+      };
+
+      dispatch({ type: 'ADD_MESSAGE', payload: aiResponse });
+    } catch (error) {
+      console.error('Error getting AI response:', error);
+      dispatch({ type: 'SET_TYPING', payload: false });
+
+      // Fallback to mock response if Gemini fails
+      const fallbackResponse: ChatMessage = {
         id: generateMessageId(),
         content: getRandomAIResponse(content),
         userId: aiUser.id,
@@ -194,9 +211,9 @@ export function ChatProvider({ children }: ChatProviderProps) {
         status: 'delivered',
         context: context,
       };
-      
-      dispatch({ type: 'ADD_MESSAGE', payload: aiResponse });
-    }, responseDelay);
+
+      dispatch({ type: 'ADD_MESSAGE', payload: fallbackResponse });
+    }
   };
 
   const createNewSession = (): void => {
