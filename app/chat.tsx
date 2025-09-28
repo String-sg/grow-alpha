@@ -2,6 +2,8 @@ import { ChatMessage } from '@/components/ChatMessage';
 import { ContextLabel } from '@/components/ContextLabel';
 import { useAudioContext } from '@/contexts/AudioContext';
 import { useChatContext } from '@/contexts/ChatContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { getScriptByPodcastId } from '@/data/scripts';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { ChevronLeft, Plus, SendHorizontal } from 'lucide-react-native';
@@ -22,6 +24,7 @@ export default function ChatScreen() {
   const { category } = useLocalSearchParams<{ category?: string }>();
   const { currentSession, isTyping, sendMessage, clearCurrentSession } = useChatContext();
   const { currentPodcast } = useAudioContext();
+  const { user, isDemoMode, login } = useAuth();
   const scrollViewRef = useRef<ScrollView>(null);
   const [inputText, setInputText] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(true);
@@ -50,27 +53,77 @@ export default function ChatScreen() {
     (currentTopic === 'AI' && msg.context === 'Artificial Intelligence')
   );
   
-  // Suggested questions based on topic (showing only 2 questions)
-  const suggestedQuestions = currentTopic === 'Special Educational Needs' ? [
-    "What are three quick strategies for teaching reading to a student with dyslexia in a mainstream classroom?",
-    "How can I create a sensory-friendly classroom for students with autism spectrum disorder?"
-  ] : (currentTopic === 'Artificial Intelligence' || currentTopic === 'AI') ? [
-    "How can I use AI to create personalized learning materials?",
-    "What are the best practices for using AI in education?"
-  ] : [
-    "What are effective strategies for teacher self-care?",
-    "How can I recognize signs of burnout in myself or colleagues?"
-  ];
+  // Generate podcast-specific suggested questions
+  const getSuggestedQuestions = () => {
+    if (currentPodcast) {
+      // Generate podcast-specific questions based on title/content
+      if (currentPodcast.title.toLowerCase().includes('adhd')) {
+        return [
+          "What are the main strategies discussed for supporting ADHD students?",
+          "How can I differentiate between inattentive and hyperactive ADHD in my classroom?"
+        ];
+      } else if (currentPodcast.title.toLowerCase().includes('dyslexia')) {
+        return [
+          "What does the research say about how dyslexic students process reading?",
+          "What are effective interventions for students with dyslexia?"
+        ];
+      } else if (currentPodcast.title.toLowerCase().includes('prompt injection')) {
+        return [
+          "What are the three prompt injection techniques mentioned?",
+          "How can teachers stay aware of AI safety in classrooms?"
+        ];
+      } else if (currentPodcast.title.toLowerCase().includes('json')) {
+        return [
+          "How do JSON style guides help with consistent AI image generation?",
+          "What's the difference between fixed and variable fields in prompts?"
+        ];
+      } else if (currentPodcast.title.toLowerCase().includes('songs')) {
+        return [
+          "What tools were mentioned for creating educational songs with AI?",
+          "How does Targeted Memory Reactivation work with study music?"
+        ];
+      }
+    }
+
+    // Fallback to topic-based questions
+    return currentTopic === 'Special Educational Needs' ? [
+      "What are three quick strategies for teaching reading to a student with dyslexia in a mainstream classroom?",
+      "How can I create a sensory-friendly classroom for students with autism spectrum disorder?"
+    ] : (currentTopic === 'Artificial Intelligence' || currentTopic === 'AI') ? [
+      "How can I use AI to create personalized learning materials?",
+      "What are the best practices for using AI in education?"
+    ] : [
+      "What are effective strategies for teacher self-care?",
+      "How can I recognize signs of burnout in myself or colleagues?"
+    ];
+  };
+
+  const suggestedQuestions = getSuggestedQuestions();
+
+  // Build podcast context for Gemini
+  const buildPodcastContext = () => {
+    if (!currentPodcast) return undefined;
+
+    const podcastScript = getScriptByPodcastId(currentPodcast.id);
+    return {
+      podcastTitle: currentPodcast.title,
+      podcastDescription: currentPodcast.description,
+      podcastTranscript: podcastScript?.content,
+      category: currentPodcast.category,
+    };
+  };
 
   const handleQuestionPress = (question: string) => {
     setInputText(question);
     setShowSuggestions(false);
-    sendMessage(question, currentTopic);
+    const podcastContext = buildPodcastContext();
+    sendMessage(question, currentTopic, podcastContext);
   };
 
   const handleSend = () => {
     if (inputText.trim()) {
-      sendMessage(inputText.trim(), currentTopic);
+      const podcastContext = buildPodcastContext();
+      sendMessage(inputText.trim(), currentTopic, podcastContext);
       setInputText('');
       setShowSuggestions(false);
     }
@@ -98,6 +151,78 @@ export default function ChatScreen() {
       router.replace('/');
     }
   };
+
+  // Check if user is properly authenticated (not in demo mode)
+  if (isDemoMode || !user || user.email === 'demo@moe.edu.sg') {
+    return (
+      <View className="flex-1">
+        <StatusBar style="dark" />
+        <SafeAreaView className="flex-1 bg-slate-50">
+          {/* Header */}
+          <View className="bg-white border-b border-slate-200">
+            <View className="flex-row items-center justify-between px-6 py-4">
+              <TouchableOpacity
+                onPress={handleBack}
+                className="w-10 h-10 items-center justify-center rounded-full bg-slate-100"
+                activeOpacity={0.7}
+              >
+                <ChevronLeft size={20} color="#000" />
+              </TouchableOpacity>
+
+              <View className="flex-1 flex-row items-center justify-center">
+                <View className="flex-row items-center gap-2">
+                  <View className="w-8 h-8 bg-black rounded-full items-center justify-center">
+                    <Text className="text-white text-xs font-geist-semibold">AI</Text>
+                  </View>
+                  <View>
+                    <Text className="text-white text-xs font-geist-semibold" style={{ color: '#000000' }}>Ask AI</Text>
+                  </View>
+                </View>
+              </View>
+              <View className="w-10" />
+            </View>
+          </View>
+
+          {/* Login Required Content */}
+          <View className="flex-1 justify-center items-center px-6">
+            <View className="bg-white rounded-3xl p-8 max-w-sm w-full shadow-sm">
+              <View className="items-center mb-6">
+                <View className="w-16 h-16 bg-slate-100 rounded-full items-center justify-center mb-4">
+                  <Text className="text-2xl">🔒</Text>
+                </View>
+                <Text className="text-xl font-geist-semibold text-black mb-2 text-center">
+                  Login Required
+                </Text>
+                <Text className="text-slate-600 text-center leading-6">
+                  You need to login with your @moe.edu.sg account to use the AI chat feature.
+                </Text>
+              </View>
+
+              <TouchableOpacity
+                onPress={login}
+                className="bg-black rounded-full py-4 px-6 mb-4"
+                activeOpacity={0.9}
+              >
+                <Text className="text-white text-center font-geist-medium">
+                  Login with Google
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={handleBack}
+                className="py-3"
+                activeOpacity={0.7}
+              >
+                <Text className="text-slate-500 text-center font-geist">
+                  Go Back
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </SafeAreaView>
+      </View>
+    );
+  }
 
   return (
     <View className="flex-1">
