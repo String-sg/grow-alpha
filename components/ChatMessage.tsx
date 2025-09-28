@@ -4,6 +4,7 @@ import { ChatColors } from '@/hooks/useThemeColor';
 import { ChatMessage as ChatMessageType } from '@/types/chat';
 import { useEffect, useRef } from 'react';
 import { Animated, Text, View } from 'react-native';
+import Markdown from 'react-native-markdown-display';
 
 interface ChatMessageProps {
   message: ChatMessageType;
@@ -72,12 +73,34 @@ export function ChatMessage({ message, isLastMessage = false }: ChatMessageProps
                   </Text>
                 </View>
               ) : (
-                // Regular AI message - plain text
-                <Text
-                  className="text-lg leading-7 text-slate-900"
+                // Regular AI message - with markdown support
+                <Markdown
+                  style={{
+                    body: {
+                      fontSize: 16,
+                      lineHeight: 24,
+                      color: '#0f172a',
+                    },
+                    strong: {
+                      fontWeight: 'bold',
+                      color: '#0f172a',
+                    },
+                    bullet_list: {
+                      marginVertical: 8,
+                    },
+                    list_item: {
+                      marginVertical: 2,
+                    },
+                    paragraph: {
+                      marginVertical: 4,
+                      fontSize: 16,
+                      lineHeight: 24,
+                      color: '#0f172a',
+                    },
+                  }}
                 >
                   {message.content}
-                </Text>
+                </Markdown>
               )}
             </View>
           ) : (

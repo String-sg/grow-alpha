@@ -4,6 +4,9 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 // Get it from: https://makersuite.google.com/app/apikey
 const GEMINI_API_KEY = process.env.EXPO_PUBLIC_GEMINI_API_KEY || 'your-gemini-api-key-here';
 
+console.log('Gemini API Key configured:', GEMINI_API_KEY ? '✓ Present' : '✗ Missing');
+console.log('API Key starts with:', GEMINI_API_KEY?.substring(0, 10) + '...');
+
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 
 export interface ChatContext {
@@ -14,10 +17,21 @@ export interface ChatContext {
 }
 
 class GeminiService {
-  private model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+  private model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-001' });
 
   async sendMessage(userMessage: string, context?: ChatContext): Promise<string> {
+    console.log('🤖 Gemini sendMessage called with:', {
+      userMessage: userMessage.substring(0, 50) + '...',
+      hasContext: !!context,
+      podcastTitle: context?.podcastTitle
+    });
+
     try {
+      // Check if API key is valid
+      if (!GEMINI_API_KEY || GEMINI_API_KEY === 'your-gemini-api-key-here') {
+        throw new Error('Invalid API key configuration');
+      }
+
       // Build context-aware system prompt
       let systemPrompt = `You are an AI assistant helping users understand educational podcast content. You are knowledgeable, helpful, and focused on learning.
 
@@ -45,11 +59,21 @@ Guidelines:
 
       systemPrompt += `User question: ${userMessage}`;
 
+      console.log('📝 Sending prompt to Gemini (length:', systemPrompt.length, 'chars)');
+
       const result = await this.model.generateContent(systemPrompt);
       const response = await result.response;
-      return response.text();
+      const responseText = response.text();
+
+      console.log('✅ Gemini response received (length:', responseText.length, 'chars)');
+      return responseText;
     } catch (error) {
-      console.error('Gemini API error:', error);
+      console.error('❌ Gemini API error details:', {
+        message: error.message,
+        name: error.name,
+        stack: error.stack?.substring(0, 200),
+        apiKeyConfigured: !!GEMINI_API_KEY && GEMINI_API_KEY !== 'your-gemini-api-key-here'
+      });
 
       // Fallback responses based on context
       if (context?.podcastTitle) {
