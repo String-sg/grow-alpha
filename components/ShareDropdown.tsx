@@ -58,7 +58,7 @@ export function ShareDropdown({ contentInfo, script, sources, onExamineSources }
     // Combine script and description for full transcript
     const fullTranscript = `${script || ''}\n\n${contentInfo.description || ''}`.trim();
     
-    let fullContent = `Assume the role of an adult learning professional. Help trigger 3 questions support inductive reasoning of the following lesson material and challenge learners to delve deeper using Singapore or regional specific examples where appropriate.
+    let fullContent = `Assume the role of an adult learning professional. Help trigger 3 questions that support inductive reasoning of the following lesson material and challenge learners to delve deeper using Singapore or regional specific examples where appropriate.
 
 <notes>
 <critical>
