@@ -145,12 +145,13 @@ describe('ShareDropdown Gemini Integration - Logic Tests', () => {
     });
 
     it('should handle URL encoding properly', () => {
-      const specialChars = 'Hello & World! @#$%';
+      const specialChars = 'Hello & World @#$%';
       const encoded = encodeURIComponent(specialChars);
 
       expect(encoded).not.toContain('&');
       expect(encoded).not.toContain(' ');
-      expect(encoded).not.toContain('!');
+      expect(encoded).toContain('%20'); // Space should be encoded
+      expect(encoded).toContain('%26'); // & should be encoded
     });
   });
 
