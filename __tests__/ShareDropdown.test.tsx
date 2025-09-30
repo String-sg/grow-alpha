@@ -1,16 +1,44 @@
 import { ShareDropdown } from '@/components/ShareDropdown';
 import { PodcastSource } from '@/types/podcast';
-import { render } from '@testing-library/react-native';
+import { fireEvent, render } from '@testing-library/react-native';
 import * as Clipboard from 'expo-clipboard';
 import React from 'react';
+import { Alert, Linking, Platform } from 'react-native';
 
 // Mock dependencies
 jest.mock('expo-clipboard');
 jest.mock('react-native/Libraries/Alert/Alert', () => ({
   alert: jest.fn(),
 }));
+jest.mock('react-native/Libraries/Linking/Linking', () => ({
+  openURL: jest.fn(),
+}));
+
+// Mock window.open for web platform tests
+const mockWindowOpen = jest.fn();
+global.window = Object.create(window);
+Object.defineProperty(window, 'open', {
+  value: mockWindowOpen,
+});
+
+// Mock navigator.clipboard for web platform tests
+Object.defineProperty(navigator, 'clipboard', {
+  value: {
+    writeText: jest.fn(),
+  },
+  writable: true,
+});
+
+// Mock eval for injection testing
+const mockEval = jest.fn();
+Object.defineProperty(window, 'eval', {
+  value: mockEval,
+});
 
 const mockClipboard = Clipboard as jest.Mocked<typeof Clipboard>;
+const mockAlert = Alert.alert as jest.MockedFunction<typeof Alert.alert>;
+const mockLinking = Linking.openURL as jest.MockedFunction<typeof Linking.openURL>;
+const mockNavigatorClipboard = navigator.clipboard.writeText as jest.MockedFunction<typeof navigator.clipboard.writeText>;
 
 describe('ShareDropdown - Recent Fix Validation', () => {
   const mockContentInfo = {
@@ -51,6 +79,12 @@ describe('ShareDropdown - Recent Fix Validation', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockClipboard.setStringAsync.mockResolvedValue();
+    mockNavigatorClipboard.mockResolvedValue();
+    mockWindowOpen.mockReturnValue({ eval: mockEval } as any);
+    mockLinking.mockResolvedValue();
+
+    // Mock Platform.OS for different test scenarios
+    Platform.OS = 'web';
   });
 
   describe('Component Rendering', () => {

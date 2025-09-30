@@ -108,19 +108,8 @@ ${contentInfo.summary ? `**Key Highlights**\n${contentInfo.summary}` : ''}`;
     return cleanContent;
   };
 
-  const handleOpenInAI = async (platform: 'chatgpt' | 'claude' | 'gemini') => {
+  const handleOpenInAI = async (platform: 'claude' | 'gemini') => {
     switch (platform) {
-      case 'chatgpt':
-        if (Platform.OS === 'web') {
-          // Glasp-like direct injection approach
-          await handleChatGPTInjection('');
-        } else {
-          // For mobile, fall back to share URL
-          const systemPrompt = generateSystemPrompt(false, true); // Encode for URL
-          const url = `https://chat.openai.com/share?message=${systemPrompt}`;
-          await Linking.openURL(url);
-        }
-        break;
       case 'claude':
         // Use the remix format with attachment parameter
         const claudePrompt = generateSystemPrompt(false, true); // Encode for URL
