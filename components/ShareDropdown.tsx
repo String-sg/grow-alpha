@@ -58,7 +58,8 @@ export function ShareDropdown({ contentInfo, script, sources, onExamineSources }
     // Combine script and description for full transcript
     const fullTranscript = `${script || ''}\n\n${contentInfo.description || ''}`.trim();
     
-    let fullContent = `
+    let fullContent = `Assume the role of an adult learning professional. Help trigger 3 questions that support inductive reasoning of the following lesson material and challenge learners to delve deeper using Singapore or regional specific examples where appropriate.
+
 <notes>
 <critical>
 Below are notes from a video course about working with the Claude language model.
@@ -108,19 +109,8 @@ ${contentInfo.summary ? `**Key Highlights**\n${contentInfo.summary}` : ''}`;
     return cleanContent;
   };
 
-  const handleOpenInAI = async (platform: 'chatgpt' | 'claude' | 'gemini') => {
+  const handleOpenInAI = async (platform: 'claude' | 'gemini') => {
     switch (platform) {
-      case 'chatgpt':
-        if (Platform.OS === 'web') {
-          // Glasp-like direct injection approach
-          await handleChatGPTInjection('');
-        } else {
-          // For mobile, fall back to share URL
-          const systemPrompt = generateSystemPrompt(false, true); // Encode for URL
-          const url = `https://chat.openai.com/share?message=${systemPrompt}`;
-          await Linking.openURL(url);
-        }
-        break;
       case 'claude':
         // Use the remix format with attachment parameter
         const claudePrompt = generateSystemPrompt(false, true); // Encode for URL
@@ -132,110 +122,109 @@ ${contentInfo.summary ? `**Key Highlights**\n${contentInfo.summary}` : ''}`;
         }
         break;
       case 'gemini':
-        const geminiPrompt = generateSystemPrompt(false, true); // Encode for URL
-        const geminiUrl = `https://gemini.google.com/app?prompt=${geminiPrompt}`;
         if (Platform.OS === 'web') {
-          window.open(geminiUrl, '_blank');
+          // Direct injection approach for Gemini
+          await handleGeminiInjection('');
         } else {
+          // For mobile, fall back to share URL
+          const geminiPrompt = generateSystemPrompt(false, true); // Encode for URL
+          const geminiUrl = `https://gemini.google.com/app?prompt=${geminiPrompt}`;
           await Linking.openURL(geminiUrl);
         }
         break;
     }
   };
 
-  const handleChatGPTInjection = async (content: string) => {
+  const handleGeminiInjection = async (content: string) => {
     try {
-      // Get raw content for clipboard (not URL-encoded) - include sources for ChatGPT
+      // Get raw content for clipboard (not URL-encoded) - include sources for Gemini
       const rawContent = generateSystemPrompt(true, false); // Include sources, don't encode for URL
+
+      // Copy to clipboard first
       try {
         await navigator.clipboard.writeText(rawContent);
+        console.log('Content copied to clipboard successfully');
       } catch (clipboardError) {
         console.warn('Clipboard access failed:', clipboardError);
+        // Fallback to older clipboard API
+        try {
+          const textArea = document.createElement('textarea');
+          textArea.value = rawContent;
+          document.body.appendChild(textArea);
+          textArea.focus();
+          textArea.select();
+          document.execCommand('copy');
+          document.body.removeChild(textArea);
+        } catch (fallbackError) {
+          console.error('All clipboard methods failed:', fallbackError);
+        }
       }
 
-      // Open ChatGPT in new tab
-      const chatGPTWindow = window.open('https://chat.openai.com', '_blank');
-      
-      if (!chatGPTWindow) {
-        Alert.alert('Error', 'Please allow popups for this site to use the ChatGPT integration.');
+      // Open Gemini in new tab
+      const geminiWindow = window.open('https://gemini.google.com/app', '_blank');
+
+      if (!geminiWindow) {
+        if (Platform.OS === 'web') {
+          window.alert('Error: Please allow popups for this site to use the Gemini integration.');
+        } else {
+          Alert.alert('Error', 'Please allow popups for this site to use the Gemini integration.');
+        }
         return;
       }
 
-      // Wait for ChatGPT to load
+      // Show immediate user instruction
+      setTimeout(() => {
+        if (Platform.OS === 'web') {
+          // Use browser's native alert for web - more reliable
+          const message = 'Content Ready for Gemini!\n\n' +
+            'Your podcast content has been copied to clipboard.\n\n' +
+            '1. Switch to the Gemini tab that just opened\n' +
+            '2. Click in the text input area\n' +
+            '3. Paste (Ctrl+V or Cmd+V) the content\n' +
+            '4. Press Enter to send\n\n' +
+            'Click OK to continue.';
+
+          window.alert(message);
+        } else {
+          // Use React Native Alert for mobile
+          Alert.alert(
+            'Content Ready for Gemini',
+            'Your podcast content has been copied to clipboard.\n\n' +
+            '1. Switch to the Gemini tab that just opened\n' +
+            '2. Click in the text input area\n' +
+            '3. Paste (Ctrl+V or Cmd+V) the content\n' +
+            '4. Press Enter to send',
+            [{ text: 'Got it!', style: 'default' }]
+          );
+        }
+      }, 1000);
+
+      // Try a simpler, CSP-compliant approach with postMessage
       setTimeout(() => {
         try {
-          // Prepare the injection script with content
-          const injectionScript = `
-            (function() {
-              // Wait for ChatGPT to fully load
-              const waitForInput = setInterval(() => {
-                const textarea = document.querySelector('textarea[data-id="root"]') || 
-                               document.querySelector('textarea[placeholder*="Message"]') ||
-                               document.querySelector('textarea[placeholder*="Ask"]') ||
-                               document.querySelector('[contenteditable="true"]') ||
-                               document.querySelector('div[contenteditable="true"]') ||
-                               document.querySelector('[role="textbox"]');
-                
-                if (textarea) {
-                  clearInterval(waitForInput);
-                  
-                  // Set the content
-                  const content = ${JSON.stringify(rawContent)};
-                  if (textarea.tagName === 'TEXTAREA') {
-                    textarea.value = content;
-                    textarea.dispatchEvent(new Event('input', { bubbles: true }));
-                    textarea.dispatchEvent(new Event('change', { bubbles: true }));
-                  } else if (textarea.contentEditable === 'true' || textarea.getAttribute('role') === 'textbox') {
-                    textarea.textContent = content;
-                    textarea.dispatchEvent(new Event('input', { bubbles: true }));
-                    textarea.dispatchEvent(new Event('change', { bubbles: true }));
-                  }
-                  
-                  // Find and click the send button
-                  setTimeout(() => {
-                    const sendButton = document.querySelector('button[data-testid="send-button"]') ||
-                                     document.querySelector('button[aria-label*="Send"]') ||
-                                     document.querySelector('button[title*="Send"]') ||
-                                     document.querySelector('button svg[data-icon="paper-plane"]')?.closest('button') ||
-                                     document.querySelector('button[type="submit"]') ||
-                                     document.querySelector('button:has(svg)');
-                    
-                    if (sendButton) {
-                      sendButton.click();
-                    } else {
-                      // If no send button found, try pressing Enter
-                      textarea.dispatchEvent(new KeyboardEvent('keydown', {
-                        key: 'Enter',
-                        code: 'Enter',
-                        keyCode: 13,
-                        which: 13,
-                        bubbles: true,
-                        cancelable: true
-                      }));
-                    }
-                  }, 1000);
-                }
-              }, 500);
-              
-              // Timeout after 15 seconds
-              setTimeout(() => {
-                clearInterval(waitForInput);
-              }, 15000);
-            })();
-          `;
-          
-          // Try direct DOM manipulation first
-          chatGPTWindow.eval(injectionScript);
-        } catch (error) {
-          console.error('ChatGPT injection failed:', error);
-          // Show alert with clipboard fallback
-          alert('Content copied to clipboard! Please paste it into ChatGPT manually.');
+          if (geminiWindow && !geminiWindow.closed) {
+            // Send a message to the Gemini window with instructions
+            geminiWindow.postMessage({
+              type: 'CLIPBOARD_PASTE_INSTRUCTION',
+              content: rawContent,
+              from: 'podcast-app'
+            }, 'https://gemini.google.com');
+
+            console.log('Sent postMessage to Gemini window');
+          }
+        } catch (postMessageError) {
+          console.log('PostMessage failed (expected):', postMessageError);
+          // This is expected to fail due to cross-origin restrictions, but worth trying
         }
-      }, 3000); // Wait 3 seconds for ChatGPT to load
+      }, 2000);
 
     } catch (error) {
-      console.error('Error opening ChatGPT:', error);
-      Alert.alert('Error', 'Could not open ChatGPT. Please try again.');
+      console.error('Error in Gemini integration:', error);
+      if (Platform.OS === 'web') {
+        window.alert('Error: Could not prepare content for Gemini. Please try again.');
+      } else {
+        Alert.alert('Error', 'Could not prepare content for Gemini. Please try again.');
+      }
     }
   };
 
@@ -300,11 +289,11 @@ ${contentInfo.summary ? `**Key Highlights**\n${contentInfo.summary}` : ''}`;
       action: handleCopyToClipboard,
     },
     {
-      id: 'chatgpt',
-      title: 'Open in ChatGPT',
+      id: 'gemini',
+      title: 'Open in Gemini',
       subtitle: 'Ask questions about this content',
-      icon: <Bot size={16} color="#10A37F" />,
-      action: () => handleOpenInAI('chatgpt'),
+      icon: <Bot size={16} color="#4285F4" />,
+      action: () => handleOpenInAI('gemini'),
     },
     {
       id: 'share',
