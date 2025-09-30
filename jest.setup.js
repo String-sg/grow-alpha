@@ -36,6 +36,36 @@ jest.mock('expo-clipboard', () => ({
   getStringAsync: jest.fn(),
 }));
 
+jest.mock('expo-constants', () => ({
+  default: {
+    expoConfig: {
+      extra: {
+        GOOGLE_CLIENT_ID: 'test-client-id',
+        GOOGLE_CLIENT_SECRET: 'test-client-secret',
+      },
+    },
+  },
+}));
+
+// Mock react-native components and APIs
+jest.mock('react-native', () => {
+  const rn = jest.requireActual('react-native');
+  return {
+    ...rn,
+    Appearance: {
+      getColorScheme: jest.fn(() => 'light'),
+      addChangeListener: jest.fn(),
+      removeChangeListener: jest.fn(),
+    },
+    Dimensions: {
+      get: jest.fn(() => ({ width: 375, height: 667 })),
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+    },
+    useWindowDimensions: jest.fn(() => ({ width: 375, height: 667 })),
+  };
+});
+
 // Mock expo-router
 jest.mock('expo-router', () => ({
   useRouter: () => ({
