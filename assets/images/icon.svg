@@ -1,4 +1,8 @@
 <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- White background circle for better visibility -->
+  <circle cx="24" cy="24" r="24" fill="white"/>
+  <!-- Dark border for definition -->
+  <circle cx="24" cy="24" r="24" fill="none" stroke="#E5E7EB" stroke-width="0.5"/>
 <path d="M23.9385 24.0635L24.0039 24V38L21.3984 26.6084L10 24L21.3984 21.3916L23.998 10.0254V10L24.001 10.0127L24.0039 10V10.0254L26.6045 21.3926L38.001 24H24.002V23.998L24 23.9971L23.999 24L23.9385 24.0635ZM23.998 23.998V23.9941L23.9385 23.9365L23.998 23.998ZM24.0039 23.9941V23.9971L24.0498 23.9492L24.0039 23.9941Z" fill="#0F172A"/>
 <path d="M26.6025 26.6074L37.999 24H24L24.0479 24.0508L23.9961 24V38L26.6025 26.6074Z" fill="#0F172A"/>
 <circle cx="24" cy="4" r="2" fill="#0F172A"/>
