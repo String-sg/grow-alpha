@@ -160,11 +160,14 @@ ${contentInfo.summary ? `**Key Highlights**\n${contentInfo.summary}` : ''}`;
             (function() {
               // Wait for Gemini to fully load
               const waitForInput = setInterval(() => {
-                const textarea = document.querySelector('div.ql-editor.textarea.new-input-ui[contenteditable="true"]') ||
-                               document.querySelector('.ql-editor[contenteditable="true"]') ||
-                               document.querySelector('[data-placeholder*="Enter a prompt"]') ||
-                               document.querySelector('[contenteditable="true"][role="textbox"]') ||
-                               document.querySelector('div[contenteditable="true"]');
+                // First, find the container
+                const container = document.querySelector('div.ql-editor.textarea.new-input-ui[contenteditable="true"]') ||
+                                document.querySelector('.ql-editor[contenteditable="true"]') ||
+                                document.querySelector('[contenteditable="true"][role="textbox"]') ||
+                                document.querySelector('div[contenteditable="true"]');
+
+                // Then find the paragraph inside the container, or the container itself
+                const textarea = container?.querySelector('p') || container;
 
                 if (textarea) {
                   clearInterval(waitForInput);
@@ -172,30 +175,53 @@ ${contentInfo.summary ? `**Key Highlights**\n${contentInfo.summary}` : ''}`;
                   // Set the content
                   const content = ${JSON.stringify(rawContent)};
 
-                  // For contenteditable div
-                  if (textarea.contentEditable === 'true') {
-                    // Clear existing content
-                    textarea.innerHTML = '';
+                  if (textarea) {
+                    // Handle paragraph elements specifically
+                    if (textarea.tagName === 'P') {
+                      // For paragraph tags, replace the text content
+                      textarea.textContent = content;
 
-                    // Create a text node and append it
-                    const textNode = document.createTextNode(content);
-                    textarea.appendChild(textNode);
+                      // Trigger input events on the parent contenteditable container
+                      const editableContainer = textarea.closest('[contenteditable="true"]');
+                      if (editableContainer) {
+                        editableContainer.dispatchEvent(new Event('input', { bubbles: true }));
+                        editableContainer.dispatchEvent(new Event('change', { bubbles: true }));
+                        editableContainer.focus();
 
-                    // Trigger input events
-                    textarea.dispatchEvent(new Event('input', { bubbles: true }));
-                    textarea.dispatchEvent(new Event('change', { bubbles: true }));
-                    textarea.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true }));
+                        // Move cursor to end of paragraph
+                        const range = document.createRange();
+                        const selection = window.getSelection();
+                        range.selectNodeContents(textarea);
+                        range.collapse(false);
+                        selection.removeAllRanges();
+                        selection.addRange(range);
+                      }
+                    }
+                    // For contenteditable div (fallback)
+                    else if (textarea.contentEditable === 'true' || textarea.hasAttribute('contenteditable')) {
+                      // Clear existing content
+                      textarea.innerHTML = '';
 
-                    // Focus the textarea
-                    textarea.focus();
+                      // Create a text node and append it
+                      const textNode = document.createTextNode(content);
+                      textarea.appendChild(textNode);
 
-                    // Move cursor to end
-                    const range = document.createRange();
-                    const selection = window.getSelection();
-                    range.selectNodeContents(textarea);
-                    range.collapse(false);
-                    selection.removeAllRanges();
-                    selection.addRange(range);
+                      // Trigger input events
+                      textarea.dispatchEvent(new Event('input', { bubbles: true }));
+                      textarea.dispatchEvent(new Event('change', { bubbles: true }));
+                      textarea.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true }));
+
+                      // Focus the textarea
+                      textarea.focus();
+
+                      // Move cursor to end
+                      const range = document.createRange();
+                      const selection = window.getSelection();
+                      range.selectNodeContents(textarea);
+                      range.collapse(false);
+                      selection.removeAllRanges();
+                      selection.addRange(range);
+                    }
                   }
 
                   // Find and click the send button
