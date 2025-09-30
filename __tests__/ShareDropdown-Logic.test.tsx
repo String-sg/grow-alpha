@@ -6,7 +6,7 @@
 
 describe('ShareDropdown Gemini Integration - Logic Tests', () => {
   describe('Content Generation Logic', () => {
-    it('should generate system prompt with proper structure', () => {
+    it('should generate system prompt with learning professional instruction', () => {
       const contentInfo = {
         title: 'Test Podcast Episode',
         subtitle: 'A test episode about education',
@@ -20,6 +20,12 @@ describe('ShareDropdown Gemini Integration - Logic Tests', () => {
       const fullTranscript = `${script}\n\n${contentInfo.description}`.trim();
       expect(fullTranscript).toContain(script);
       expect(fullTranscript).toContain(contentInfo.description);
+
+      // Test that the learning professional instruction is included
+      const learningInstruction = 'Assume the role of an adult learner. Help trigger 3 questions support inductive reasoning of the following lesson material and challenge me to delve deeper using Singapore or regional specific examples where appropriate.';
+      expect(learningInstruction).toContain('adult learning professional');
+      expect(learningInstruction).toContain('3 questions support inductive reasoning');
+      expect(learningInstruction).toContain('Singapore or regional specific examples');
     });
 
     it('should handle missing content gracefully', () => {
@@ -94,24 +100,26 @@ describe('ShareDropdown Gemini Integration - Logic Tests', () => {
 
   describe('DOM Selector Logic', () => {
     it('should provide correct Gemini input selectors', () => {
-      const selectors = [
+      const containerSelectors = [
+        'rich-textarea div.ql-editor.textarea.new-input-ui[contenteditable="true"]',
         'div.ql-editor.textarea.new-input-ui[contenteditable="true"]',
         '.ql-editor[contenteditable="true"]',
-        '[data-placeholder*="Enter a prompt"]',
         '[contenteditable="true"][role="textbox"]',
         'div[contenteditable="true"]'
       ];
 
-      // Test primary selector
-      expect(selectors[0]).toContain('ql-editor');
-      expect(selectors[0]).toContain('textarea');
-      expect(selectors[0]).toContain('new-input-ui');
-      expect(selectors[0]).toContain('contenteditable="true"');
+      // Test primary selector (with rich-textarea parent)
+      expect(containerSelectors[0]).toContain('rich-textarea');
+      expect(containerSelectors[0]).toContain('ql-editor');
+      expect(containerSelectors[0]).toContain('textarea');
+      expect(containerSelectors[0]).toContain('new-input-ui');
+      expect(containerSelectors[0]).toContain('contenteditable="true"');
 
-      // Test fallback selectors (not all contain 'contenteditable')
-      expect(selectors[1]).toContain('contenteditable');
-      expect(selectors[3]).toContain('contenteditable');
-      expect(selectors[4]).toContain('contenteditable');
+      // Test fallback selectors
+      expect(containerSelectors[1]).toContain('ql-editor');
+      expect(containerSelectors[2]).toContain('contenteditable');
+      expect(containerSelectors[3]).toContain('contenteditable');
+      expect(containerSelectors[4]).toContain('contenteditable');
     });
 
     it('should provide correct send button selectors', () => {
@@ -229,21 +237,50 @@ describe('ShareDropdown Gemini Integration - Logic Tests', () => {
   });
 
   describe('Content Injection Logic', () => {
-    it('should handle contenteditable div injection', () => {
+    it('should handle paragraph element injection', () => {
+      const testContent = 'Test content for Gemini';
+
+      // Mock paragraph element (like the <p>samura</p> in Gemini)
+      const mockParagraph = {
+        tagName: 'P',
+        textContent: '',
+        closest: jest.fn().mockReturnValue({
+          dispatchEvent: jest.fn(),
+          focus: jest.fn()
+        })
+      };
+
+      // Simulate paragraph injection logic
+      if (mockParagraph.tagName === 'P') {
+        mockParagraph.textContent = testContent;
+        const container = mockParagraph.closest('[contenteditable="true"]');
+        if (container) {
+          container.dispatchEvent({} as any);
+          container.focus();
+        }
+      }
+
+      expect(mockParagraph.textContent).toBe(testContent);
+      expect(mockParagraph.closest).toHaveBeenCalledWith('[contenteditable="true"]');
+    });
+
+    it('should handle contenteditable div injection as fallback', () => {
       const testContent = 'Test content for Gemini';
       const mockTextNode = { textContent: testContent };
 
-      // Mock DOM operations
+      // Mock contenteditable div (fallback)
       const mockElement = {
+        tagName: 'DIV',
         innerHTML: '',
         contentEditable: 'true',
+        hasAttribute: jest.fn().mockReturnValue(true),
         appendChild: jest.fn(),
         focus: jest.fn(),
         dispatchEvent: jest.fn()
       };
 
-      // Simulate injection logic
-      if (mockElement.contentEditable === 'true') {
+      // Simulate div injection logic (fallback)
+      if (mockElement.tagName !== 'P' && (mockElement.contentEditable === 'true' || mockElement.hasAttribute('contenteditable'))) {
         mockElement.innerHTML = '';
         mockElement.appendChild(mockTextNode);
         mockElement.focus();

@@ -58,7 +58,8 @@ export function ShareDropdown({ contentInfo, script, sources, onExamineSources }
     // Combine script and description for full transcript
     const fullTranscript = `${script || ''}\n\n${contentInfo.description || ''}`.trim();
     
-    let fullContent = `
+    let fullContent = `Assume the role of an adult learning professional. Help trigger 3 questions support inductive reasoning of the following lesson material and challenge learners to delve deeper using Singapore or regional specific examples where appropriate.
+
 <notes>
 <critical>
 Below are notes from a video course about working with the Claude language model.
@@ -138,137 +139,92 @@ ${contentInfo.summary ? `**Key Highlights**\n${contentInfo.summary}` : ''}`;
     try {
       // Get raw content for clipboard (not URL-encoded) - include sources for Gemini
       const rawContent = generateSystemPrompt(true, false); // Include sources, don't encode for URL
+
+      // Copy to clipboard first
       try {
         await navigator.clipboard.writeText(rawContent);
+        console.log('Content copied to clipboard successfully');
       } catch (clipboardError) {
         console.warn('Clipboard access failed:', clipboardError);
+        // Fallback to older clipboard API
+        try {
+          const textArea = document.createElement('textarea');
+          textArea.value = rawContent;
+          document.body.appendChild(textArea);
+          textArea.focus();
+          textArea.select();
+          document.execCommand('copy');
+          document.body.removeChild(textArea);
+        } catch (fallbackError) {
+          console.error('All clipboard methods failed:', fallbackError);
+        }
       }
 
       // Open Gemini in new tab
       const geminiWindow = window.open('https://gemini.google.com/app', '_blank');
 
       if (!geminiWindow) {
-        Alert.alert('Error', 'Please allow popups for this site to use the Gemini integration.');
+        if (Platform.OS === 'web') {
+          window.alert('Error: Please allow popups for this site to use the Gemini integration.');
+        } else {
+          Alert.alert('Error', 'Please allow popups for this site to use the Gemini integration.');
+        }
         return;
       }
 
-      // Wait for Gemini to load
+      // Show immediate user instruction
+      setTimeout(() => {
+        if (Platform.OS === 'web') {
+          // Use browser's native alert for web - more reliable
+          const message = 'Content Ready for Gemini!\n\n' +
+            'Your podcast content has been copied to clipboard.\n\n' +
+            '1. Switch to the Gemini tab that just opened\n' +
+            '2. Click in the text input area\n' +
+            '3. Paste (Ctrl+V or Cmd+V) the content\n' +
+            '4. Press Enter to send\n\n' +
+            'Click OK to continue.';
+
+          window.alert(message);
+        } else {
+          // Use React Native Alert for mobile
+          Alert.alert(
+            'Content Ready for Gemini',
+            'Your podcast content has been copied to clipboard.\n\n' +
+            '1. Switch to the Gemini tab that just opened\n' +
+            '2. Click in the text input area\n' +
+            '3. Paste (Ctrl+V or Cmd+V) the content\n' +
+            '4. Press Enter to send',
+            [{ text: 'Got it!', style: 'default' }]
+          );
+        }
+      }, 1000);
+
+      // Try a simpler, CSP-compliant approach with postMessage
       setTimeout(() => {
         try {
-          // Prepare the injection script with content
-          const injectionScript = `
-            (function() {
-              // Wait for Gemini to fully load
-              const waitForInput = setInterval(() => {
-                // First, find the container
-                const container = document.querySelector('div.ql-editor.textarea.new-input-ui[contenteditable="true"]') ||
-                                document.querySelector('.ql-editor[contenteditable="true"]') ||
-                                document.querySelector('[contenteditable="true"][role="textbox"]') ||
-                                document.querySelector('div[contenteditable="true"]');
+          if (geminiWindow && !geminiWindow.closed) {
+            // Send a message to the Gemini window with instructions
+            geminiWindow.postMessage({
+              type: 'CLIPBOARD_PASTE_INSTRUCTION',
+              content: rawContent,
+              from: 'podcast-app'
+            }, 'https://gemini.google.com');
 
-                // Then find the paragraph inside the container, or the container itself
-                const textarea = container?.querySelector('p') || container;
-
-                if (textarea) {
-                  clearInterval(waitForInput);
-
-                  // Set the content
-                  const content = ${JSON.stringify(rawContent)};
-
-                  if (textarea) {
-                    // Handle paragraph elements specifically
-                    if (textarea.tagName === 'P') {
-                      // For paragraph tags, replace the text content
-                      textarea.textContent = content;
-
-                      // Trigger input events on the parent contenteditable container
-                      const editableContainer = textarea.closest('[contenteditable="true"]');
-                      if (editableContainer) {
-                        editableContainer.dispatchEvent(new Event('input', { bubbles: true }));
-                        editableContainer.dispatchEvent(new Event('change', { bubbles: true }));
-                        editableContainer.focus();
-
-                        // Move cursor to end of paragraph
-                        const range = document.createRange();
-                        const selection = window.getSelection();
-                        range.selectNodeContents(textarea);
-                        range.collapse(false);
-                        selection.removeAllRanges();
-                        selection.addRange(range);
-                      }
-                    }
-                    // For contenteditable div (fallback)
-                    else if (textarea.contentEditable === 'true' || textarea.hasAttribute('contenteditable')) {
-                      // Clear existing content
-                      textarea.innerHTML = '';
-
-                      // Create a text node and append it
-                      const textNode = document.createTextNode(content);
-                      textarea.appendChild(textNode);
-
-                      // Trigger input events
-                      textarea.dispatchEvent(new Event('input', { bubbles: true }));
-                      textarea.dispatchEvent(new Event('change', { bubbles: true }));
-                      textarea.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true }));
-
-                      // Focus the textarea
-                      textarea.focus();
-
-                      // Move cursor to end
-                      const range = document.createRange();
-                      const selection = window.getSelection();
-                      range.selectNodeContents(textarea);
-                      range.collapse(false);
-                      selection.removeAllRanges();
-                      selection.addRange(range);
-                    }
-                  }
-
-                  // Find and click the send button
-                  setTimeout(() => {
-                    const sendButton = document.querySelector('button[aria-label*="Send"]') ||
-                                     document.querySelector('button[title*="Send"]') ||
-                                     document.querySelector('button[data-testid*="send"]') ||
-                                     document.querySelector('button:has(svg[data-testid*="send"])') ||
-                                     document.querySelector('button svg[viewBox*="24"]')?.closest('button') ||
-                                     document.querySelector('button[type="submit"]');
-
-                    if (sendButton && !sendButton.disabled) {
-                      sendButton.click();
-                    } else {
-                      // If no send button found or disabled, try pressing Enter
-                      textarea.dispatchEvent(new KeyboardEvent('keydown', {
-                        key: 'Enter',
-                        code: 'Enter',
-                        keyCode: 13,
-                        which: 13,
-                        bubbles: true,
-                        cancelable: true
-                      }));
-                    }
-                  }, 1000);
-                }
-              }, 500);
-
-              // Timeout after 15 seconds
-              setTimeout(() => {
-                clearInterval(waitForInput);
-              }, 15000);
-            })();
-          `;
-
-          // Try direct DOM manipulation first
-          geminiWindow.eval(injectionScript);
-        } catch (error) {
-          console.error('Gemini injection failed:', error);
-          // Show alert with clipboard fallback
-          alert('Content copied to clipboard! Please paste it into Gemini manually.');
+            console.log('Sent postMessage to Gemini window');
+          }
+        } catch (postMessageError) {
+          console.log('PostMessage failed (expected):', postMessageError);
+          // This is expected to fail due to cross-origin restrictions, but worth trying
         }
-      }, 3000); // Wait 3 seconds for Gemini to load
+      }, 2000);
 
     } catch (error) {
-      console.error('Error opening Gemini:', error);
-      Alert.alert('Error', 'Could not open Gemini. Please try again.');
+      console.error('Error in Gemini integration:', error);
+      if (Platform.OS === 'web') {
+        window.alert('Error: Could not prepare content for Gemini. Please try again.');
+      } else {
+        Alert.alert('Error', 'Could not prepare content for Gemini. Please try again.');
+      }
     }
   };
 
