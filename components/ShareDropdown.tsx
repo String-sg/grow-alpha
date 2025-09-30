@@ -132,20 +132,22 @@ ${contentInfo.summary ? `**Key Highlights**\n${contentInfo.summary}` : ''}`;
         }
         break;
       case 'gemini':
-        const geminiPrompt = generateSystemPrompt(false, true); // Encode for URL
-        const geminiUrl = `https://gemini.google.com/app?prompt=${geminiPrompt}`;
         if (Platform.OS === 'web') {
-          window.open(geminiUrl, '_blank');
+          // Direct injection approach for Gemini
+          await handleGeminiInjection('');
         } else {
+          // For mobile, fall back to share URL
+          const geminiPrompt = generateSystemPrompt(false, true); // Encode for URL
+          const geminiUrl = `https://gemini.google.com/app?prompt=${geminiPrompt}`;
           await Linking.openURL(geminiUrl);
         }
         break;
     }
   };
 
-  const handleChatGPTInjection = async (content: string) => {
+  const handleGeminiInjection = async (content: string) => {
     try {
-      // Get raw content for clipboard (not URL-encoded) - include sources for ChatGPT
+      // Get raw content for clipboard (not URL-encoded) - include sources for Gemini
       const rawContent = generateSystemPrompt(true, false); // Include sources, don't encode for URL
       try {
         await navigator.clipboard.writeText(rawContent);
@@ -153,57 +155,73 @@ ${contentInfo.summary ? `**Key Highlights**\n${contentInfo.summary}` : ''}`;
         console.warn('Clipboard access failed:', clipboardError);
       }
 
-      // Open ChatGPT in new tab
-      const chatGPTWindow = window.open('https://chat.openai.com', '_blank');
-      
-      if (!chatGPTWindow) {
-        Alert.alert('Error', 'Please allow popups for this site to use the ChatGPT integration.');
+      // Open Gemini in new tab
+      const geminiWindow = window.open('https://gemini.google.com/app', '_blank');
+
+      if (!geminiWindow) {
+        Alert.alert('Error', 'Please allow popups for this site to use the Gemini integration.');
         return;
       }
 
-      // Wait for ChatGPT to load
+      // Wait for Gemini to load
       setTimeout(() => {
         try {
           // Prepare the injection script with content
           const injectionScript = `
             (function() {
-              // Wait for ChatGPT to fully load
+              // Wait for Gemini to fully load
               const waitForInput = setInterval(() => {
-                const textarea = document.querySelector('textarea[data-id="root"]') || 
-                               document.querySelector('textarea[placeholder*="Message"]') ||
-                               document.querySelector('textarea[placeholder*="Ask"]') ||
-                               document.querySelector('[contenteditable="true"]') ||
-                               document.querySelector('div[contenteditable="true"]') ||
-                               document.querySelector('[role="textbox"]');
-                
+                const textarea = document.querySelector('div.ql-editor.textarea.new-input-ui[contenteditable="true"]') ||
+                               document.querySelector('.ql-editor[contenteditable="true"]') ||
+                               document.querySelector('[data-placeholder*="Enter a prompt"]') ||
+                               document.querySelector('[contenteditable="true"][role="textbox"]') ||
+                               document.querySelector('div[contenteditable="true"]');
+
                 if (textarea) {
                   clearInterval(waitForInput);
-                  
+
                   // Set the content
                   const content = ${JSON.stringify(rawContent)};
-                  if (textarea.tagName === 'TEXTAREA') {
-                    textarea.value = content;
+
+                  // For contenteditable div
+                  if (textarea.contentEditable === 'true') {
+                    // Clear existing content
+                    textarea.innerHTML = '';
+
+                    // Create a text node and append it
+                    const textNode = document.createTextNode(content);
+                    textarea.appendChild(textNode);
+
+                    // Trigger input events
                     textarea.dispatchEvent(new Event('input', { bubbles: true }));
                     textarea.dispatchEvent(new Event('change', { bubbles: true }));
-                  } else if (textarea.contentEditable === 'true' || textarea.getAttribute('role') === 'textbox') {
-                    textarea.textContent = content;
-                    textarea.dispatchEvent(new Event('input', { bubbles: true }));
-                    textarea.dispatchEvent(new Event('change', { bubbles: true }));
+                    textarea.dispatchEvent(new KeyboardEvent('keyup', { bubbles: true }));
+
+                    // Focus the textarea
+                    textarea.focus();
+
+                    // Move cursor to end
+                    const range = document.createRange();
+                    const selection = window.getSelection();
+                    range.selectNodeContents(textarea);
+                    range.collapse(false);
+                    selection.removeAllRanges();
+                    selection.addRange(range);
                   }
-                  
+
                   // Find and click the send button
                   setTimeout(() => {
-                    const sendButton = document.querySelector('button[data-testid="send-button"]') ||
-                                     document.querySelector('button[aria-label*="Send"]') ||
+                    const sendButton = document.querySelector('button[aria-label*="Send"]') ||
                                      document.querySelector('button[title*="Send"]') ||
-                                     document.querySelector('button svg[data-icon="paper-plane"]')?.closest('button') ||
-                                     document.querySelector('button[type="submit"]') ||
-                                     document.querySelector('button:has(svg)');
-                    
-                    if (sendButton) {
+                                     document.querySelector('button[data-testid*="send"]') ||
+                                     document.querySelector('button:has(svg[data-testid*="send"])') ||
+                                     document.querySelector('button svg[viewBox*="24"]')?.closest('button') ||
+                                     document.querySelector('button[type="submit"]');
+
+                    if (sendButton && !sendButton.disabled) {
                       sendButton.click();
                     } else {
-                      // If no send button found, try pressing Enter
+                      // If no send button found or disabled, try pressing Enter
                       textarea.dispatchEvent(new KeyboardEvent('keydown', {
                         key: 'Enter',
                         code: 'Enter',
@@ -216,26 +234,26 @@ ${contentInfo.summary ? `**Key Highlights**\n${contentInfo.summary}` : ''}`;
                   }, 1000);
                 }
               }, 500);
-              
+
               // Timeout after 15 seconds
               setTimeout(() => {
                 clearInterval(waitForInput);
               }, 15000);
             })();
           `;
-          
+
           // Try direct DOM manipulation first
-          chatGPTWindow.eval(injectionScript);
+          geminiWindow.eval(injectionScript);
         } catch (error) {
-          console.error('ChatGPT injection failed:', error);
+          console.error('Gemini injection failed:', error);
           // Show alert with clipboard fallback
-          alert('Content copied to clipboard! Please paste it into ChatGPT manually.');
+          alert('Content copied to clipboard! Please paste it into Gemini manually.');
         }
-      }, 3000); // Wait 3 seconds for ChatGPT to load
+      }, 3000); // Wait 3 seconds for Gemini to load
 
     } catch (error) {
-      console.error('Error opening ChatGPT:', error);
-      Alert.alert('Error', 'Could not open ChatGPT. Please try again.');
+      console.error('Error opening Gemini:', error);
+      Alert.alert('Error', 'Could not open Gemini. Please try again.');
     }
   };
 
@@ -300,11 +318,11 @@ ${contentInfo.summary ? `**Key Highlights**\n${contentInfo.summary}` : ''}`;
       action: handleCopyToClipboard,
     },
     {
-      id: 'chatgpt',
-      title: 'Open in ChatGPT',
+      id: 'gemini',
+      title: 'Open in Gemini',
       subtitle: 'Ask questions about this content',
-      icon: <Bot size={16} color="#10A37F" />,
-      action: () => handleOpenInAI('chatgpt'),
+      icon: <Bot size={16} color="#4285F4" />,
+      action: () => handleOpenInAI('gemini'),
     },
     {
       id: 'share',
