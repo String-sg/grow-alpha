@@ -1,4 +1,5 @@
 import { GOOGLE_OAUTH_CONFIG, MOE_DOMAIN, STORAGE_KEYS } from '@/config/auth';
+import { processDemoEmailAccess } from '@/services/emailService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
 import * as AuthSession from 'expo-auth-session';
@@ -26,10 +27,12 @@ interface AuthContextType {
   isLoading: boolean;
   isOffline: boolean;
   isDemoMode: boolean;
+  hasValidEmail: boolean;
   login: () => Promise<void>;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
-  enableDemoMode: () => void;
+  enableDemoMode: () => Promise<void>;
+  setDemoEmail: (email: string) => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -41,6 +44,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
   const [isOffline, setIsOffline] = useState(false);
   const [isDemoMode, setIsDemoMode] = useState(false);
+  const [hasValidEmail, setHasValidEmail] = useState(false);
 
   // Check network connectivity
   useEffect(() => {
@@ -154,10 +158,88 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // Enable demo mode
-  const enableDemoMode = () => {
-    setIsDemoMode(true);
-    setUser(DEMO_USER);
-    setIsLoading(false);
+  const enableDemoMode = async () => {
+    try {
+      // Clear any existing demo email data to force fresh email entry
+      await AsyncStorage.multiRemove(['demo_email', 'demo_email_domain']);
+
+      console.log('Enabling demo mode...');
+      setIsDemoMode(true);
+      setUser(DEMO_USER);
+      setHasValidEmail(false); // Reset to require new email entry
+      setIsLoading(false);
+
+      console.log('Demo mode enabled - user will need to enter email for chat access', {
+        isDemoMode: true,
+        hasValidEmail: false,
+        user: DEMO_USER
+      });
+    } catch (error) {
+      console.error('Error enabling demo mode:', error);
+      setIsDemoMode(true);
+      setUser(DEMO_USER);
+      setHasValidEmail(false);
+      setIsLoading(false);
+    }
+  };
+
+  // Set demo email and validate it
+  const setDemoEmail = async (email: string): Promise<boolean> => {
+    try {
+      const result = await processDemoEmailAccess(email);
+
+      if (result.isValid) {
+        // Store validated email
+        await AsyncStorage.setItem('demo_email', result.email!);
+        await AsyncStorage.setItem('demo_email_domain', result.domainCategory!);
+
+        // Update demo user with real email
+        const demoUserWithEmail = {
+          ...DEMO_USER,
+          email: result.email!,
+          name: `Demo User (${result.domainCategory})`
+        };
+
+        setUser(demoUserWithEmail);
+        setHasValidEmail(true);
+
+        console.log('Demo email validated:', {
+          email: result.email,
+          domain: result.domainCategory,
+          notificationSent: result.notificationSent
+        });
+
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      console.error('Error setting demo email:', error);
+      return false;
+    }
+  };
+
+  // Check for stored demo email on startup
+  const checkStoredDemoEmail = async () => {
+    try {
+      const storedEmail = await AsyncStorage.getItem('demo_email');
+      const storedDomain = await AsyncStorage.getItem('demo_email_domain');
+
+      if (storedEmail && storedDomain && isDemoMode) {
+        const demoUserWithEmail = {
+          ...DEMO_USER,
+          email: storedEmail,
+          name: `Demo User (${storedDomain})`
+        };
+
+        setUser(demoUserWithEmail);
+        setHasValidEmail(true);
+
+        console.log('Restored demo email from storage:', storedEmail);
+      }
+    } catch (error) {
+      console.error('Error checking stored demo email:', error);
+    }
   };
 
   // Login function
@@ -307,7 +389,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = async () => {
     try {
       await clearAuthData();
+      // Clear demo email data
+      await AsyncStorage.multiRemove(['demo_email', 'demo_email_domain']);
       setUser(null);
+      setHasValidEmail(false);
+      setIsDemoMode(false);
     } catch (error) {
       console.error('Logout error:', error);
     }
@@ -346,6 +432,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         // Validate token (you might want to add token validation here)
         setUser(userData);
+      } else if (isDemoMode) {
+        // Check for stored demo email if in demo mode
+        await checkStoredDemoEmail();
       }
     } catch (error) {
       console.error('Error checking auth:', error);
@@ -364,10 +453,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isLoading,
     isOffline,
     isDemoMode,
+    hasValidEmail,
     login,
     logout,
     checkAuth,
     enableDemoMode,
+    setDemoEmail,
   };
 
   return (

@@ -1,5 +1,6 @@
 import { ChatMessage } from '@/components/ChatMessage';
 import { ContextLabel } from '@/components/ContextLabel';
+import { EmailInputModal } from '@/components/EmailInputModal';
 import { useAudioContext } from '@/contexts/AudioContext';
 import { useChatContext } from '@/contexts/ChatContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -24,11 +25,12 @@ export default function ChatScreen() {
   const { category } = useLocalSearchParams<{ category?: string }>();
   const { currentSession, isTyping, sendMessage, clearCurrentSession } = useChatContext();
   const { currentPodcast } = useAudioContext();
-  const { user, isDemoMode, login } = useAuth();
+  const { user, isDemoMode, hasValidEmail, setDemoEmail } = useAuth();
   const scrollViewRef = useRef<ScrollView>(null);
   const [inputText, setInputText] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [showEmailModal, setShowEmailModal] = useState(false);
   const inputRef = useRef<TextInput>(null);
 
   const messages = currentSession?.messages || [];
@@ -152,8 +154,48 @@ export default function ChatScreen() {
     }
   };
 
-  // Check if user is properly authenticated (not in demo mode)
-  if (isDemoMode || !user || user.email === 'demo@moe.edu.sg') {
+  // Handle email submission from modal
+  const handleEmailSubmit = async (email: string) => {
+    const success = await setDemoEmail(email);
+    if (success) {
+      setShowEmailModal(false);
+    } else {
+      throw new Error('Invalid email domain');
+    }
+  };
+
+  // Check if user has access to chat
+  const hasAccess = () => {
+    if (!isDemoMode && user && user.email !== 'demo@moe.edu.sg') {
+      // User is properly authenticated with OAuth
+      return true;
+    }
+
+    if (isDemoMode && hasValidEmail) {
+      // User is in demo mode with valid email
+      return true;
+    }
+
+    return false;
+  };
+
+  // Show email modal if in demo mode without valid email
+  useEffect(() => {
+    console.log('Chat email modal check:', { isDemoMode, hasValidEmail, showEmailModal, user });
+    if (isDemoMode && !hasValidEmail && !showEmailModal) {
+      console.log('Showing email modal for demo mode');
+      setShowEmailModal(true);
+    }
+  }, [isDemoMode, hasValidEmail, showEmailModal, user]);
+
+  // For demo mode without valid email, show the main interface with modal
+  if (isDemoMode && !hasValidEmail) {
+    // Show the chat interface but with the email modal on top
+    console.log('Demo mode without valid email - showing interface with modal');
+  }
+
+  // Check if user has access to chat (but allow demo mode to show interface)
+  if (!hasAccess() && !(isDemoMode && !hasValidEmail)) {
     return (
       <View className="flex-1">
         <StatusBar style="dark" />
@@ -400,6 +442,16 @@ export default function ChatScreen() {
           </View>
         </KeyboardAvoidingView>
       </SafeAreaView>
+
+      {/* Email Input Modal */}
+      <EmailInputModal
+        visible={showEmailModal}
+        onSubmit={handleEmailSubmit}
+        onCancel={() => {
+          setShowEmailModal(false);
+          router.replace('/');
+        }}
+      />
     </View>
   );
 }
