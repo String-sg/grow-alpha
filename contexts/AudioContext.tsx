@@ -124,6 +124,8 @@ export function AudioProvider({ children }: AudioProviderProps) {
   const soundRef = useRef<Audio.Sound | null>(null);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const completionTrackedRef = useRef<Set<string>>(new Set()); // Track which podcasts have had completion events fired
+  const isLoadingAudioRef = useRef(false); // Prevent multiple simultaneous audio loads
+  const lastPlayRequestRef = useRef<string | null>(null); // Track last play request to prevent duplicates
   
   // Update progress from sound status
   const updateProgress = (status: any) => {
@@ -348,8 +350,28 @@ export function AudioProvider({ children }: AudioProviderProps) {
 
   // Play podcast function
   const playPodcast = async (podcast: Podcast, episode?: Episode) => {
+    const requestId = `${podcast.id}-${episode?.id || 'main'}-${Date.now()}`;
+
+    // Prevent multiple simultaneous loads
+    if (isLoadingAudioRef.current) {
+      console.log('Audio already loading, ignoring duplicate request');
+      return;
+    }
+
+    // Check if this is the same content that's already playing
+    if (state.currentPodcast?.id === podcast.id &&
+        state.currentEpisode?.id === episode?.id &&
+        state.isPlaying &&
+        soundRef.current) {
+      console.log('Same content already playing, ignoring duplicate request');
+      return;
+    }
+
     try {
       console.log('Starting playPodcast for:', podcast.title);
+      isLoadingAudioRef.current = true;
+      lastPlayRequestRef.current = requestId;
+
       dispatch({ type: 'SET_LOADING', payload: true });
       dispatch({ type: 'SET_ERROR', payload: null });
 
@@ -398,13 +420,16 @@ export function AudioProvider({ children }: AudioProviderProps) {
       
       // Start progress tracking
       startProgressTracking();
-      
+
       dispatch({ type: 'SET_LOADING', payload: false });
       console.log('Podcast started successfully with pitch correction enabled');
     } catch (error) {
       console.error('Failed to play podcast:', error);
       dispatch({ type: 'SET_ERROR', payload: 'Failed to load audio. Please try again.' });
       dispatch({ type: 'SET_LOADING', payload: false });
+    } finally {
+      // Always reset loading flag
+      isLoadingAudioRef.current = false;
     }
   };
 
@@ -425,11 +450,35 @@ export function AudioProvider({ children }: AudioProviderProps) {
 
   // Resume podcast function
   const resumePodcast = async () => {
+    // Prevent resume if already loading audio
+    if (isLoadingAudioRef.current) {
+      console.log('Audio loading in progress, ignoring resume request');
+      return;
+    }
+
+    // Prevent resume if already playing
+    if (state.isPlaying && soundRef.current) {
+      console.log('Audio already playing, ignoring resume request');
+      return;
+    }
+
     try {
       if (soundRef.current) {
-        await soundRef.current.playAsync();
-        dispatch({ type: 'SET_PLAYING', payload: true });
-        startProgressTracking();
+        // Check if sound is still loaded before attempting to play
+        const status = await soundRef.current.getStatusAsync();
+        if (status.isLoaded) {
+          await soundRef.current.playAsync();
+          dispatch({ type: 'SET_PLAYING', payload: true });
+          startProgressTracking();
+        } else {
+          // Sound is unloaded, recreate it
+          console.log('Sound unloaded, recreating...');
+          if (state.currentPodcast) {
+            await playPodcast(state.currentPodcast, state.currentEpisode || undefined);
+          } else {
+            throw new Error('No current podcast to recreate');
+          }
+        }
       } else if (state.currentPodcast) {
         // Sound doesn't exist, recreate it with the saved podcast
         console.log('Sound not found, recreating with saved podcast:', state.currentPodcast.title);
@@ -440,7 +489,7 @@ export function AudioProvider({ children }: AudioProviderProps) {
       }
     } catch (error) {
       console.error('Failed to resume podcast:', error);
-      dispatch({ type: 'SET_ERROR', payload: 'Failed to resume audio' });
+      dispatch({ type: 'SET_ERROR', payload: 'Failed to resume audio. Please try restarting playback.' });
     }
   };
 

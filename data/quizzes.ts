@@ -6,6 +6,52 @@ import { Quiz } from '@/types/quiz';
  */
 export const mockQuizzes: Quiz[] = [
   {
+    id: 'quiz-24',
+    podcastId: '24', // Beyond 'no gaming'
+    title: 'Beyond "no gaming" Quiz',
+    description: 'Test your understanding of Self-Determination Theory, gaming behavior patterns, and effective educator interventions for student well-being.',
+    durationThreshold: 0.8, // 80% listening required
+    estimatedTime: 5,
+    questions: [
+      {
+        id: 'q24-1',
+        question: 'According to the transcript, which set of three key psychological needs, as proposed by Self-Determination Theory (SDT), are met by gaming, making it highly attractive to students?',
+        difficulty: 'easy',
+        options: [
+          { id: 'opt1-1', text: 'Mastery, Independence, and Affiliation', isCorrect: false },
+          { id: 'opt1-2', text: 'Autonomy, Relatedness, and Competence', isCorrect: true },
+          { id: 'opt1-3', text: 'Self-Regulation, Emotional Control, and Achievement', isCorrect: false },
+          { id: 'opt1-4', text: 'Fun, Freedom, and Socialisation', isCorrect: false }
+        ],
+        explanation: 'The transcript explicitly states, "games meet three key needs: autonomy, relatedness, and competence," where students get to make choices, feel belonging, and experience mastery. While games can offer mastery and affiliation (similar to competence and relatedness), "Independence" is not the precise term used in SDT; Autonomy refers to making choices and controlling one\'s own destiny.'
+      },
+      {
+        id: 'q24-2',
+        question: 'Which pattern of gaming behavior is defined by the ICD-11 as one that causes significant impairment in personal, family, social, educational, or other important areas of functioning?',
+        difficulty: 'medium',
+        options: [
+          { id: 'opt2-1', text: 'Hazardous Gaming', isCorrect: false },
+          { id: 'opt2-2', text: 'Excessive Play', isCorrect: false },
+          { id: 'opt2-3', text: 'Gaming Disorder', isCorrect: true },
+          { id: 'opt2-4', text: 'Recreational Gaming', isCorrect: false }
+        ],
+        explanation: 'The transcript states that Gaming Disorder is defined by the ICD-11 as gaming that "significantly impairs daily functioning," which is the key diagnostic element. Hazardous gaming is defined as "excessive play that raises risks for health and well-being," which is less severe than the clinical diagnosis. Recreational Gaming describes gaming for enjoyment and is contrasted with problematic use.'
+      },
+      {
+        id: 'q24-3',
+        question: 'A teacher notices a student is exhibiting signs of hazardous gaming and learns the student primarily games to find a sense of belonging and social connection (relatedness). Based on the guidance provided in the transcript, what is the most appropriate proactive strategy for the teacher to suggest?',
+        difficulty: 'medium',
+        options: [
+          { id: 'opt3-1', text: 'Suggest they reduce their screen time by one hour every day.', isCorrect: false },
+          { id: 'opt3-2', text: 'Guide them to a replacement activity like joining a CCA or a group project.', isCorrect: true },
+          { id: 'opt3-3', text: 'Ask them to research the Ministry of Health (MOH) guidelines on screentime.', isCorrect: false },
+          { id: 'opt3-4', text: 'Advise them to use music or physical exercise as a coping strategy when they feel stressed.', isCorrect: false }
+        ],
+        explanation: 'The transcript\'s second recommendation is to "guide them to replacement activities" that still meet their needs, specifically suggesting "joining a CCA or doing a group project" if they game for social connection. While time limits and coping strategies are important, the guidance prioritizes addressing the underlying need (Relatedness) by providing healthy alternatives that fulfill that same need.'
+      }
+    ]
+  },
+  {
     id: 'quiz-2',
     podcastId: '2', // ADHD in Classrooms: Strategies That Work
     title: 'ADHD in Classrooms Quiz',

@@ -45,7 +45,7 @@ export default function LoginScreen() {
         [
           {
             text: 'Try Demo Mode',
-            onPress: enableDemoMode,
+            onPress: () => enableDemoMode(),
           },
           {
             text: 'Cancel',
@@ -56,9 +56,9 @@ export default function LoginScreen() {
     }
   };
 
-  const handleDemoMode = () => {
+  const handleDemoMode = async () => {
     try {
-      enableDemoMode();
+      await enableDemoMode();
     } catch (error) {
       console.error('Error in handleDemoMode:', error);
     }

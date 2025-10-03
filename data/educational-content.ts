@@ -23,6 +23,47 @@ export interface EducationalContent {
 
 export const educationalContent: EducationalContent[] = [
   {
+    id: '24',
+    title: "Beyond 'no gaming'",
+    description: `Drawing on Self-Determination Theory (SDT), this episode explores the psychological appeal of gaming, which meets students' core needs for autonomy, competence, and relatedness. It differentiates between recreational gaming, hazardous gaming, and the clinical Gaming Disorder (ICD-11 definition), equipping educators to recognize warning signs and proactively guide students toward balanced well-being.
+
+You'll be able to:
+a) Unmet Needs Drive Engagement: Recognise that excessive gaming often serves as a signal, fulfilling unmet psychological needs for autonomy, competence, or relatedness that students may not be satisfied with at home or school.
+b) Spot Key Warning Signs: Monitor for clear indicators of hazardous gaming, such as neglecting schoolwork, lying, poor emotional regulation, or sleep problems, as teachers are often the first to notice these shifts.
+c) Substitute and Cope: Guide students toward healthy replacement activities (e.g., CCAs, sports) that satisfy the same core needs, and equip them with non-gaming coping strategies (e.g., music, exercise) to manage stress.`,
+    summary: `a) Unmet Needs Drive Engagement: Recognise that excessive gaming often serves as a signal, fulfilling unmet psychological needs for autonomy, competence, or relatedness that students may not be satisfied with at home or school.
+b) Spot Key Warning Signs: Monitor for clear indicators of hazardous gaming, such as neglecting schoolwork, lying, poor emotional regulation, or sleep problems, as teachers are often the first to notice these shifts.
+c) Substitute and Cope: Guide students toward healthy replacement activities (e.g., CCAs, sports) that satisfy the same core needs, and equip them with non-gaming coping strategies (e.g., music, exercise) to manage stress.`,
+    category: 'Student Well-being',
+    author: 'SDCD (Demo)',
+    duration: 420000, // 7 minutes - placeholder duration
+    imageUrl: 'https://picsum.photos/400/400?random=24',
+    audioUrl: require('../assets/audio/Beyond Stop Gaming_2025 1003 1859.mp3'),
+    backgroundColor: 'bg-white',
+    badgeColor: 'bg-blue-200',
+    textColor: 'text-blue-900',
+    timeLeft: '7m',
+    progress: 0,
+    publishedDate: 'Today',
+    createdAt: new Date(),
+    sources: [
+      {
+        title: '[PLACEHOLDER: Self-Determination Theory research]',
+        url: 'https://example.com/sdt-research',
+        type: 'article',
+        author: 'Deci & Ryan',
+        publishedDate: '2025',
+      },
+      {
+        title: '[PLACEHOLDER: ICD-11 Gaming Disorder definition]',
+        url: 'https://example.com/icd-11-gaming',
+        type: 'article',
+        author: 'World Health Organization',
+        publishedDate: '2024',
+      },
+    ]
+  },
+  {
     id: '10',
     title: 'Learn to Use AI: More Consistent & Controlled Image Generation with JSON Formatting',
     description: `Using JSON style guides allows teachers to lock key visual elements (style, camera angle, and colour palette) so that AI-generated images remain consistent across lessons, reducing distractions and improving student focus on learning.
