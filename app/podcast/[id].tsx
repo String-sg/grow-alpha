@@ -71,6 +71,14 @@ const getTopicColors = (category: string) => {
         hex: '#0F766E', // teal-700
         lightHex: '#CCFBF1' // teal-100
       };
+    case 'Student Well-being':
+      return {
+        background: 'bg-blue-100',
+        badge: 'bg-blue-200',
+        text: 'text-blue-900',
+        hex: '#2563EB', // blue-600
+        lightHex: '#DBEAFE' // blue-100
+      };
     default:
       return {
         background: 'bg-purple-100',
