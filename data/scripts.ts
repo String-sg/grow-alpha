@@ -3,7 +3,7 @@ import { PodcastScript } from '../types/script';
 export const podcastScripts: PodcastScript[] = [
   {
     podcastId: '10',
-    title: 'Learn to Use AI: Taming Inconsistent AI Images,
+    title: 'Learn to Use AI: Taming Inconsistent AI Images',
     content: `[PLACEHOLDER: Add the full script content for the JSON Formatting for AI Image Generation podcast here]
 
 This should include:
