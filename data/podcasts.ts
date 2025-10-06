@@ -63,7 +63,7 @@ You'll be able to:
   },
   {
     id: '8',
-    title: 'Learn about AI (Safety): Prompt Injection',
+    title: 'Learn about AI: How to Trick a Language Model',
     description: `Prompt injection shows how AI systems can be tricked by carefully worded instructions, highlighting the need for awareness and critical use in education.
 
 You'll be able to:

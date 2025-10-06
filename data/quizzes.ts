@@ -100,7 +100,7 @@ export const mockQuizzes: Quiz[] = [
   {
     id: 'quiz-10',
     podcastId: '10', // Learn to Use AI: More Consistent & Controlled Image Generation with JSON Formatting
-    title: 'AI Image Generation with JSON Quiz',
+    title: 'Learn to Use AI: Taming Inconsistent AI Images',
     description: 'Test your understanding of using JSON style guides for consistent and controlled AI image generation in educational contexts.',
     durationThreshold: 0.8, // 80% listening required
     estimatedTime: 5,
