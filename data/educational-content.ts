@@ -65,7 +65,7 @@ c) Substitute and Cope: Guide students toward healthy replacement activities (e.
   },
   {
     id: '10',
-    title: 'Learn to Use AI: More Consistent & Controlled Image Generation with JSON Formatting',
+    title: 'Learn to Use AI: Taming Inconsistent AI Images',
     description: `Using JSON style guides allows teachers to lock key visual elements (style, camera angle, and colour palette) so that AI-generated images remain consistent across lessons, reducing distractions and improving student focus on learning.
 
 You'll be able to:
@@ -101,7 +101,7 @@ You'll be able to:
   },
   {
     id: '8',
-    title: 'Learn about AI (Safety): Prompt Injection',
+    title: 'Learn about AI: How to Trick a Language Model',
     description: `Prompt injection shows how AI systems can be tricked by carefully worded instructions, highlighting the need for awareness and critical use in education.
 
 You'll be able to:
