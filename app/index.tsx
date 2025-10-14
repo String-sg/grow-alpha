@@ -7,6 +7,7 @@ import { WeekCalendar } from '@/components/WeekCalendar';
 import { useAuth } from '@/contexts/AuthContext';
 import { EducationalContent, educationalContent, weeklyProgress } from '@/data/educational-content';
 import { useAudio } from '@/hooks/useAudio';
+import { contentService } from '@/services/contentService';
 import { getFeedbackFormUrl } from '@/utils/feedback';
 import { useRouter } from 'expo-router';
 import React, { useState, useEffect } from 'react';
@@ -17,7 +18,27 @@ export default function HomeScreen() {
   const { currentPodcast, playContent } = useAudio();
   const { user } = useAuth();
   const [recentlyPlayed, setRecentlyPlayed] = useState<{ id: string; title: string; timestamp: number; imageUrl: string; category: string; author: string }[]>([]);
-  
+  const [allContent, setAllContent] = useState<EducationalContent[]>(educationalContent);
+  const [isLoadingContent, setIsLoadingContent] = useState(false);
+
+  // Load hybrid content (database + static) on mount
+  useEffect(() => {
+    const loadContent = async () => {
+      setIsLoadingContent(true);
+      try {
+        const hybridContent = await contentService.getAllContent(educationalContent);
+        setAllContent(hybridContent);
+      } catch (error) {
+        console.error('Failed to load hybrid content:', error);
+        // Keep static content as fallback
+      } finally {
+        setIsLoadingContent(false);
+      }
+    };
+
+    loadContent();
+  }, []);
+
   const handleContentPress = (content: EducationalContent) => {
     router.push(`/podcast/${content.id}`);
   };
@@ -67,7 +88,7 @@ export default function HomeScreen() {
 
 
 
-  const allContent = educationalContent.filter(content => 
+  const filteredContent = allContent.filter(content =>
     !(content.progress && content.progress > 0 && content.progress < 1) && content.id !== '6'
   );
 
@@ -103,9 +124,9 @@ export default function HomeScreen() {
             <View className="px-6">
               {recentlyPlayed.slice(0, 3).map((item) => {
                 // Find the full content data to pass to EducationalCard
-                const content = educationalContent.find(c => c.id === item.id);
+                const content = allContent.find(c => c.id === item.id);
                 if (!content) return null;
-                
+
                 return (
                   <EducationalCard
                     key={item.id}
@@ -129,7 +150,7 @@ export default function HomeScreen() {
           
           <View className="px-6">
             {(() => {
-              const filteredContent = educationalContent.filter(content => 
+              const recommendedContent = allContent.filter(content =>
                 !recentlyPlayed.some(recent => recent.id === content.id)
               );
               

@@ -286,7 +286,7 @@ export default function AddContentScreen() {
             <TextInput
               value={author}
               onChangeText={setAuthor}
-              placeholder="e.g., Kahhow, SDCD (Demo), Education Technology Team"
+              placeholder="e.g., DXD Product Team, SDCD (Demo), Education Technology Team"
               className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 bg-white"
               placeholderTextColor="#9CA3AF"
             />
