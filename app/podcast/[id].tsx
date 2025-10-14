@@ -97,6 +97,7 @@ export default function PodcastDetailsScreen() {
   const { id, from, topicId } = useLocalSearchParams<{ id: string; from?: string; topicId?: string }>();
   const { user } = useAuth(); // Get authenticated user info
   const [content, setContent] = useState<EducationalContent | null>(null);
+  const [dbQuiz, setDbQuiz] = useState<any>(null);
   const [notes, setNotes] = useState<Note[]>([]);
   const [showNoteEditor, setShowNoteEditor] = useState(false);
   const [editingNote, setEditingNote] = useState<Note | null>(null);
@@ -198,11 +199,23 @@ export default function PodcastDetailsScreen() {
           // Try to get content from hybrid service (database + static)
           const foundContent = await contentService.getContentById(id, educationalContent);
           setContent(foundContent);
+
+          // Try to load quiz from database if content was found
+          if (foundContent) {
+            try {
+              const quiz = await quizService.getQuizByPodcastId(id);
+              setDbQuiz(quiz);
+            } catch (error) {
+              console.log('No database quiz found for podcast:', id);
+              setDbQuiz(null);
+            }
+          }
         } catch (error) {
           console.error('Failed to load content:', error);
           // Fallback to static content only
           const staticContent = educationalContent.find(c => c.id === id);
           setContent(staticContent || null);
+          setDbQuiz(null);
         }
       }
     };
@@ -258,11 +271,21 @@ export default function PodcastDetailsScreen() {
     // Track dive deeper click
     analytics.trackDiveDeeperClick(content.id, content.title);
 
+    // Check for database quiz first
+    if (dbQuiz) {
+      router.push({
+        pathname: `/quiz/${dbQuiz.id}` as any,
+        params: { podcastId: content.id, type: 'database' }
+      });
+      return;
+    }
+
+    // Fallback to mock quiz
     const quiz = mockQuizzes.find(q => q.podcastId === content.id);
     if (quiz) {
       router.push({
         pathname: `/quiz/${quiz.id}` as any,
-        params: { podcastId: content.id }
+        params: { podcastId: content.id, type: 'mock' }
       });
     }
   };
@@ -448,7 +471,7 @@ export default function PodcastDetailsScreen() {
   const isThisPodcastCurrent = isCurrentPodcast(content.id);
   const isThisPodcastPlaying = isContentPlaying(content.id);
   const isThisPodcastLoading = isThisPodcastCurrent && (isLoading || isContentBuffering);
-  const hasQuiz = mockQuizzes.some(q => q.podcastId === content.id);
+  const hasQuiz = dbQuiz !== null || mockQuizzes.some(q => q.podcastId === content.id);
   
   // Check if mini player is visible (any podcast is currently loaded)
   const isMiniPlayerVisible = currentlyPlayingPodcast !== null;

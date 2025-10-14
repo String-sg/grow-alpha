@@ -6,6 +6,7 @@ import { useAudioContext } from '@/contexts/AudioContext';
 import { useMLU } from '@/contexts/MLUContext';
 import { mockQuizzes } from '@/data/quizzes';
 import { mockPodcasts } from '@/data/podcasts';
+import { quizService } from '@/services/quizService';
 import {
   Quiz,
   QuizAnswer,
@@ -31,7 +32,7 @@ const QUIZ_STORAGE_KEY = 'quiz_attempts';
 const QUIZ_PROGRESS_KEY = 'quiz_progress';
 
 export default function QuizScreen() {
-  const { id, podcastId } = useLocalSearchParams<{ id: string; podcastId?: string }>();
+  const { id, podcastId, type } = useLocalSearchParams<{ id: string; podcastId?: string; type?: string }>();
   const { currentPodcast } = useAudioContext();
   const { incrementCompletedMLUs } = useMLU();
   const [quiz, setQuiz] = useState<Quiz | null>(null);
