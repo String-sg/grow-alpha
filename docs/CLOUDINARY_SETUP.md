@@ -33,9 +33,9 @@ In your [Cloudinary Dashboard](https://cloudinary.com/console):
 
 Your `.env` file should have:
 ```env
-CLOUDINARY_CLOUD_NAME=dqyyzrh1n
-CLOUDINARY_API_KEY=839259455222124
-CLOUDINARY_API_SECRET=hV6GHrQu-Aq5vpOsoQVA6FapRsk
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
 ```
 
 ## 3. Switch to Real Service
