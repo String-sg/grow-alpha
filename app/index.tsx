@@ -154,7 +154,7 @@ export default function HomeScreen() {
                 !recentlyPlayed.some(recent => recent.id === content.id)
               );
               
-              if (filteredContent.length === 0) {
+              if (recommendedContent.length === 0) {
                 return (
                   <View className="text-center py-8">
                     <Text className="text-slate-600 text-base text-center">
@@ -163,10 +163,10 @@ export default function HomeScreen() {
                   </View>
                 );
               }
-              
+
               return (
                 <>
-                  {filteredContent.map((content) => (
+                  {recommendedContent.map((content) => (
                     <EducationalCard
                       key={content.id}
                       content={content}

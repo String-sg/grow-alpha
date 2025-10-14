@@ -29,6 +29,7 @@ export default function AddContentScreen() {
   const [sources, setSources] = useState<PodcastSource[]>([
     { title: '', url: '', type: 'article', author: '', publishedDate: '' }
   ]);
+  const [quizJson, setQuizJson] = useState('');
 
   // File handling
   const [selectedAudioFile, setSelectedAudioFile] = useState<DocumentPicker.DocumentPickerResult | null>(null);
