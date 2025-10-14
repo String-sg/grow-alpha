@@ -1,6 +1,6 @@
 import { GOOGLE_OAUTH_CONFIG, MOE_DOMAIN, STORAGE_KEYS } from '@/config/auth';
 import { processDemoEmailAccess } from '@/services/emailService';
-import { userService, type DatabaseUser } from '@/services/userService';
+import { userService } from '@/services/userService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
 import * as AuthSession from 'expo-auth-session';
@@ -19,7 +19,7 @@ const DEMO_USER = {
 // Admin user configuration
 const ADMIN_EMAILS = [
   'lee_kah_how@moe.edu.sg',
-  'tay_hui_zhen_jasmine@moe.gov.sg'
+  'tay_hui_zhen_jasmine@moe.edu.sg'
 ];
 
 interface User {
