@@ -35,15 +35,6 @@ export const EducationalCard: React.FC<EducationalCardProps> = ({
 
   const { isAdmin } = useAuth();
 
-  // Debug logging for delete button visibility
-  console.log('EducationalCard Debug:', {
-    title: content.title,
-    isAdmin,
-    isFromDatabase,
-    hasOnDelete: !!onDelete,
-    shouldShowDelete: isAdmin && isFromDatabase && onDelete
-  });
-
   const isThisPodcastCurrent = isCurrentPodcast(content.id);
   const isThisPodcastPlaying = isContentPlaying(content.id);
   const isThisPodcastLoading = isThisPodcastCurrent && (isLoading || isContentBuffering);
@@ -147,11 +138,8 @@ export const EducationalCard: React.FC<EducationalCardProps> = ({
             {isAdmin && isFromDatabase && onDelete && (
               <TouchableOpacity
                 onPress={(e) => {
-                  console.log('🗑️ Delete button pressed for:', content.title);
                   e.stopPropagation();
-                  console.log('🗑️ Calling onDelete function...');
                   onDelete();
-                  console.log('🗑️ onDelete function called');
                 }}
                 className="w-8 h-8 items-center justify-center rounded-full bg-red-50 border border-red-200"
                 activeOpacity={0.7}

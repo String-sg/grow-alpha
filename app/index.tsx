@@ -119,27 +119,62 @@ export default function HomeScreen() {
       const confirmed = window.confirm(`Are you sure you want to delete "${content.title}"? This action cannot be undone.`);
 
       if (confirmed) {
-        console.log('🗑️ Delete confirmed (web), proceeding with deletion');
-            try {
-              const result = await adminService.deletePodcast(content.id, user.email);
+        try {
+          const result = await adminService.deletePodcast(content.id, user.email);
 
-              if (result.success) {
-                Alert.alert('Success', 'Podcast deleted successfully.');
+          if (result.success) {
+            alert('Success: Podcast deleted successfully.');
 
-                // Remove from local state
-                setAllContent(prev => prev.filter(c => c.id !== content.id));
-                setRecentlyPlayed(prev => prev.filter(r => r.id !== content.id));
-              } else {
-                Alert.alert('Error', result.error || 'Failed to delete podcast.');
-              }
-            } catch (error) {
-              console.error('Delete error:', error);
-              Alert.alert('Error', 'An unexpected error occurred while deleting the podcast.');
-            }
+            // Remove from local state
+            setAllContent(prev => prev.filter(c => c.id !== content.id));
+            setRecentlyPlayed(prev => prev.filter(r => r.id !== content.id));
+          } else {
+            alert('Error: ' + (result.error || 'Failed to delete podcast.'));
+          }
+        } catch (error) {
+          console.error('Delete error:', error);
+          alert('Error: An unexpected error occurred while deleting the podcast.');
+        }
+      } else {
+        console.log('🗑️ Delete cancelled (web)');
+      }
+    } else {
+      // Use native Alert for mobile platforms
+      Alert.alert(
+        'Delete Podcast',
+        `Are you sure you want to delete "${content.title}"? This action cannot be undone.`,
+        [
+          {
+            text: 'Cancel',
+            style: 'cancel',
+            onPress: () => console.log('🗑️ Delete cancelled'),
           },
-        },
-      ]
-    );
+          {
+            text: 'Delete',
+            style: 'destructive',
+            onPress: async () => {
+              console.log('🗑️ Delete confirmed (mobile), proceeding with deletion');
+              try {
+                const result = await adminService.deletePodcast(content.id, user.email);
+
+                if (result.success) {
+                  Alert.alert('Success', 'Podcast deleted successfully.');
+
+                  // Remove from local state
+                  setAllContent(prev => prev.filter(c => c.id !== content.id));
+                  setRecentlyPlayed(prev => prev.filter(r => r.id !== content.id));
+                } else {
+                  Alert.alert('Error', result.error || 'Failed to delete podcast.');
+                }
+              } catch (error) {
+                console.error('Delete error:', error);
+                Alert.alert('Error', 'An unexpected error occurred while deleting the podcast.');
+              }
+            },
+          },
+        ]
+      );
+    }
   };
 
 
