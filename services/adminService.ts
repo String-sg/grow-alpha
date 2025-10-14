@@ -2,6 +2,7 @@
 import { mockCloudinaryService as cloudinaryService, type CloudinaryUploadResult } from './mockCloudinaryService';
 // import { cloudinaryService, type CloudinaryUploadResult } from './cloudinaryService';
 import { podcastService, type CreatePodcastData } from './podcastService';
+import { quizService } from './quizService';
 import { userService } from './userService';
 
 export interface AdminPodcastCreationData {
