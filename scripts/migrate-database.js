@@ -44,7 +44,7 @@ async function runMigration() {
     await sql`
       UPDATE users
       SET is_admin = TRUE
-      WHERE email IN ('lee_kah_how@moe.edu.sg', 'tay_hui_zhen_jasmine@moe.gov.sg');
+      WHERE email IN ('lee_kah_how@moe.edu.sg', 'tay_hui_zhen_jasmine@moe.edu.sg');
     `;
     console.log('✅ Admin users updated\n');
 
