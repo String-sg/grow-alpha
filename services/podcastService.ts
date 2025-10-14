@@ -81,61 +81,58 @@ class PodcastService {
     try {
       await this.ensureInitialized();
 
-      // Start transaction
-      const result = await sql.transaction(async (tx) => {
-        // Create the podcast
-        const podcastResult = await tx`
-          INSERT INTO podcasts (
-            title, description, author, category, image_url, audio_url, duration_ms, created_by
-          )
-          VALUES (
-            ${podcastData.title},
-            ${podcastData.description},
-            ${podcastData.author},
-            ${podcastData.category || null},
-            ${podcastData.image_url || null},
-            ${podcastData.audio_url || null},
-            ${podcastData.duration_ms || null},
-            ${podcastData.created_by}
-          )
-          RETURNING *;
-        `;
+      // Create the podcast first
+      const podcastResult = await sql`
+        INSERT INTO podcasts (
+          title, description, author, category, image_url, audio_url, duration_ms, created_by
+        )
+        VALUES (
+          ${podcastData.title},
+          ${podcastData.description},
+          ${podcastData.author},
+          ${podcastData.category || null},
+          ${podcastData.image_url || null},
+          ${podcastData.audio_url || null},
+          ${podcastData.duration_ms || null},
+          ${podcastData.created_by}
+        )
+        RETURNING *;
+      `;
 
-        const podcast = podcastResult[0] as DatabasePodcast;
+      const podcast = podcastResult[0] as DatabasePodcast;
 
-        // Create sources if provided
-        if (podcastData.sources && podcastData.sources.length > 0) {
-          for (const source of podcastData.sources) {
-            await tx`
-              INSERT INTO podcast_sources (
-                podcast_id, title, url, type, author, published_date
-              )
-              VALUES (
-                ${podcast.id},
-                ${source.title},
-                ${source.url},
-                ${source.type},
-                ${source.author || null},
-                ${source.published_date || null}
-              );
-            `;
-          }
+      // Create sources if provided
+      if (podcastData.sources && podcastData.sources.length > 0) {
+        for (const source of podcastData.sources) {
+          await sql`
+            INSERT INTO podcast_sources (
+              podcast_id, title, url, type, author, published_date
+            )
+            VALUES (
+              ${podcast.id},
+              ${source.title},
+              ${source.url},
+              ${source.type},
+              ${source.author || null},
+              ${source.published_date || null}
+            );
+          `;
         }
+      }
 
-        // Log admin activity
-        await tx`
-          INSERT INTO admin_logs (admin_id, action, resource_type, resource_id, details)
-          VALUES (
-            ${podcastData.created_by},
-            'create_podcast',
-            'podcast',
-            ${podcast.id},
-            ${JSON.stringify({ title: podcast.title, sources_count: podcastData.sources?.length || 0 })}
-          );
-        `;
+      // Log admin activity
+      await sql`
+        INSERT INTO admin_logs (admin_id, action, resource_type, resource_id, details)
+        VALUES (
+          ${podcastData.created_by},
+          'create_podcast',
+          'podcast',
+          ${podcast.id},
+          ${JSON.stringify({ title: podcast.title, sources_count: podcastData.sources?.length || 0 })}
+        );
+      `;
 
-        return podcast;
-      });
+      const result = podcast;
 
       console.log('Podcast created successfully:', result.id);
       return result;
@@ -317,36 +314,34 @@ class PodcastService {
     try {
       await this.ensureInitialized();
 
-      const result = await sql.transaction(async (tx) => {
-        // Get podcast info for logging
-        const podcast = await tx`
-          SELECT title FROM podcasts WHERE id = ${id} LIMIT 1;
-        `;
+      // Get podcast info for logging
+      const podcast = await sql`
+        SELECT title FROM podcasts WHERE id = ${id} LIMIT 1;
+      `;
 
-        if (podcast.length === 0) {
-          throw new Error('Podcast not found');
-        }
+      if (podcast.length === 0) {
+        throw new Error('Podcast not found');
+      }
 
-        // Delete sources (cascade will handle this, but being explicit)
-        await tx`DELETE FROM podcast_sources WHERE podcast_id = ${id};`;
+      // Delete sources (cascade will handle this, but being explicit)
+      await sql`DELETE FROM podcast_sources WHERE podcast_id = ${id};`;
 
-        // Delete podcast
-        const deleteResult = await tx`DELETE FROM podcasts WHERE id = ${id};`;
+      // Delete podcast
+      const deleteResult = await sql`DELETE FROM podcasts WHERE id = ${id};`;
 
-        // Log admin activity
-        await tx`
-          INSERT INTO admin_logs (admin_id, action, resource_type, resource_id, details)
-          VALUES (
-            ${adminId},
-            'delete_podcast',
-            'podcast',
-            ${id},
-            ${JSON.stringify({ title: podcast[0].title })}
-          );
-        `;
+      // Log admin activity
+      await sql`
+        INSERT INTO admin_logs (admin_id, action, resource_type, resource_id, details)
+        VALUES (
+          ${adminId},
+          'delete_podcast',
+          'podcast',
+          ${id},
+          ${JSON.stringify({ title: podcast[0].title })}
+        );
+      `;
 
-        return deleteResult.count > 0;
-      });
+      const result = deleteResult.count > 0;
 
       console.log('Podcast deleted successfully:', id);
       return result;

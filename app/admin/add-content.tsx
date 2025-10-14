@@ -1,10 +1,10 @@
-import { adminService } from '@/services/adminService';
 import { useAuth } from '@/contexts/AuthContext';
-import { useRouter } from 'expo-router';
+import { adminService } from '@/services/adminService';
 import * as DocumentPicker from 'expo-document-picker';
+import { useRouter } from 'expo-router';
 import { ArrowLeft, CheckCircle, Minus, Plus, Upload } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { Alert, ScrollView, Text, TextInput, TouchableOpacity, View, ActivityIndicator } from 'react-native';
+import { ActivityIndicator, Alert, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 interface PodcastSource {
@@ -335,54 +335,6 @@ export default function AddContentScreen() {
               )}
             </TouchableOpacity>
           </View>
-
-          {/* Cover Image Upload */}
-          <View className="mb-6">
-            <Text className="text-gray-700 text-base font-medium mb-2">Cover Image (Optional)</Text>
-            <TouchableOpacity
-              onPress={handleImageFilePicker}
-              disabled={isSubmitting}
-              className={`w-full py-4 border-2 border-dashed rounded-lg items-center justify-center ${
-                selectedImageFile
-                  ? 'border-green-300 bg-green-50'
-                  : 'border-gray-300 bg-gray-50'
-              } ${isSubmitting ? 'opacity-50' : ''}`}
-              activeOpacity={0.8}
-            >
-              {selectedImageFile ? (
-                <>
-                  <CheckCircle size={24} color="#16A34A" />
-                  <Text className="text-green-700 mt-2 font-medium">
-                    {selectedImageFile.assets?.[0]?.name || 'Image file selected'}
-                  </Text>
-                  <Text className="text-green-600 text-sm mt-1">
-                    {selectedImageFile.assets?.[0]?.size
-                      ? `${Math.round((selectedImageFile.assets[0].size / 1024 / 1024) * 100) / 100} MB`
-                      : 'Ready to upload'}
-                  </Text>
-                </>
-              ) : (
-                <>
-                  <Upload size={24} color="#9CA3AF" />
-                  <Text className="text-gray-500 mt-2">Tap to select cover image</Text>
-                  <Text className="text-gray-400 text-sm mt-1">JPG, PNG, or WEBP</Text>
-                </>
-              )}
-            </TouchableOpacity>
-
-            {/* Alternative Image URL Input */}
-            <Text className="text-gray-600 text-center text-sm my-2">or enter image URL:</Text>
-            <TextInput
-              value={imageUrl}
-              onChangeText={setImageUrl}
-              placeholder="https://picsum.photos/400/400?random=1"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 bg-white"
-              placeholderTextColor="#9CA3AF"
-              autoCapitalize="none"
-              editable={!isSubmitting}
-            />
-          </View>
-
           {/* Sources Section */}
           <View className="mb-6">
             <View className="flex-row items-center justify-between mb-3">
@@ -507,18 +459,6 @@ export default function AddContentScreen() {
             )}
           </TouchableOpacity>
 
-          {/* Form Instructions */}
-          <View className="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
-            <Text className="text-green-800 font-medium mb-1">✨ Fully Functional</Text>
-            <Text className="text-green-700 text-sm">
-              This form creates real podcasts with:
-              {'\n'}• Audio file upload to Cloudinary
-              {'\n'}• Automatic duration detection
-              {'\n'}• Database storage with UUID generation
-              {'\n'}• Source references and metadata
-              {'\n'}• Admin activity logging
-            </Text>
-          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
