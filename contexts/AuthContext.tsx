@@ -1,5 +1,6 @@
 import { GOOGLE_OAUTH_CONFIG, MOE_DOMAIN, STORAGE_KEYS } from '@/config/auth';
 import { processDemoEmailAccess } from '@/services/emailService';
+import { userService, type DatabaseUser } from '@/services/userService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
 import * as AuthSession from 'expo-auth-session';
