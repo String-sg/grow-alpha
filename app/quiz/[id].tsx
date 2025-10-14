@@ -58,13 +58,19 @@ export default function QuizScreen() {
               id: dbQuiz.id,
               podcastId: dbQuiz.podcast_id,
               title: `Quiz for ${podcastId}`, // We'll need to get the podcast title
+              description: 'Database-generated quiz',
+              durationThreshold: 0.8, // 80% listening requirement
+              estimatedTime: 5, // 5 minutes estimated
               questions: dbQuiz.questions.map((q: any, index: number) => ({
                 id: `${dbQuiz.id}-q${index + 1}`,
                 question: q.question,
-                options: q.options,
-                correctAnswer: q.answer,
+                options: q.options.map((option: string, optionIndex: number) => ({
+                  id: `${dbQuiz.id}-q${index + 1}-o${optionIndex}`,
+                  text: option,
+                  isCorrect: optionIndex === q.answer,
+                })),
                 explanation: q.explanation,
-                order: q.order || index + 1,
+                difficulty: 'medium' as const,
               })),
             };
           }
