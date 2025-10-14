@@ -232,54 +232,52 @@ class PodcastService {
     try {
       await this.ensureInitialized();
 
-      const setParts = [];
-      const values = [];
-      let paramIndex = 1;
+      // Check if there are any updates to make
+      const hasUpdates = updates.title || updates.description || updates.author ||
+                        updates.category !== undefined || updates.image_url !== undefined ||
+                        updates.audio_url !== undefined || updates.duration_ms !== undefined;
 
-      if (updates.title) {
-        setParts.push(`title = $${paramIndex++}`);
-        values.push(updates.title);
-      }
-      if (updates.description) {
-        setParts.push(`description = $${paramIndex++}`);
-        values.push(updates.description);
-      }
-      if (updates.author) {
-        setParts.push(`author = $${paramIndex++}`);
-        values.push(updates.author);
-      }
-      if (updates.category !== undefined) {
-        setParts.push(`category = $${paramIndex++}`);
-        values.push(updates.category);
-      }
-      if (updates.image_url !== undefined) {
-        setParts.push(`image_url = $${paramIndex++}`);
-        values.push(updates.image_url);
-      }
-      if (updates.audio_url !== undefined) {
-        setParts.push(`audio_url = $${paramIndex++}`);
-        values.push(updates.audio_url);
-      }
-      if (updates.duration_ms !== undefined) {
-        setParts.push(`duration_ms = $${paramIndex++}`);
-        values.push(updates.duration_ms);
-      }
-
-      if (setParts.length === 0) {
+      if (!hasUpdates) {
         return await this.getPodcastById(id).then(p => p || null);
       }
 
-      setParts.push(`updated_at = NOW()`);
-      values.push(id);
+      // Build dynamic update query manually since we need conditional updates
+      let query = 'UPDATE podcasts SET ';
+      const queryValues = [];
 
-      const query = `
-        UPDATE podcasts
-        SET ${setParts.join(', ')}
-        WHERE id = $${values.length}
-        RETURNING *;
-      `;
+      if (updates.title) {
+        query += 'title = $' + (queryValues.length + 1) + ', ';
+        queryValues.push(updates.title);
+      }
+      if (updates.description) {
+        query += 'description = $' + (queryValues.length + 1) + ', ';
+        queryValues.push(updates.description);
+      }
+      if (updates.author) {
+        query += 'author = $' + (queryValues.length + 1) + ', ';
+        queryValues.push(updates.author);
+      }
+      if (updates.category !== undefined) {
+        query += 'category = $' + (queryValues.length + 1) + ', ';
+        queryValues.push(updates.category);
+      }
+      if (updates.image_url !== undefined) {
+        query += 'image_url = $' + (queryValues.length + 1) + ', ';
+        queryValues.push(updates.image_url);
+      }
+      if (updates.audio_url !== undefined) {
+        query += 'audio_url = $' + (queryValues.length + 1) + ', ';
+        queryValues.push(updates.audio_url);
+      }
+      if (updates.duration_ms !== undefined) {
+        query += 'duration_ms = $' + (queryValues.length + 1) + ', ';
+        queryValues.push(updates.duration_ms);
+      }
 
-      const result = await sql.unsafe(query, values);
+      query += 'updated_at = NOW() WHERE id = $' + (queryValues.length + 1) + ' RETURNING *';
+      queryValues.push(id);
+
+      const result = await sql.unsafe(query, queryValues);
       const updatedPodcast = result[0] as DatabasePodcast;
 
       // Log admin activity
@@ -341,7 +339,7 @@ class PodcastService {
         );
       `;
 
-      const result = deleteResult.count > 0;
+      const result = deleteResult.length > 0;
 
       console.log('Podcast deleted successfully:', id);
       return result;
