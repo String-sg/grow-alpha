@@ -44,7 +44,19 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ onProfilePress }) 
         </Text>
       </View>
       
-      <View className="flex-row items-center gap-2">
+      <View className="flex-row items-center gap-3">
+        {/* Admin Add Content Button - Only visible to admins */}
+        {isAdmin && (
+          <TouchableOpacity
+            onPress={handleAdminPress}
+            className="w-10 h-10 rounded-full bg-blue-600 items-center justify-center"
+            activeOpacity={0.8}
+          >
+            <Plus size={20} color="white" />
+          </TouchableOpacity>
+        )}
+
+        {/* Profile Button */}
         <TouchableOpacity
           onPress={handleProfilePress}
           className={`w-10 h-10 rounded-full overflow-hidden items-center justify-center ${
