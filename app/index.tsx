@@ -111,6 +111,9 @@ export default function HomeScreen() {
       return;
     }
 
+    console.log('🗑️ About to show Alert.alert confirmation');
+    console.log('🗑️ Platform:', Platform.OS);
+
     Alert.alert(
       'Delete Podcast',
       `Are you sure you want to delete "${content.title}"? This action cannot be undone.`,
@@ -118,11 +121,13 @@ export default function HomeScreen() {
         {
           text: 'Cancel',
           style: 'cancel',
+          onPress: () => console.log('🗑️ Delete cancelled'),
         },
         {
           text: 'Delete',
           style: 'destructive',
           onPress: async () => {
+            console.log('🗑️ Delete confirmed, proceeding with deletion');
             try {
               const result = await adminService.deletePodcast(content.id, user.email);
 
