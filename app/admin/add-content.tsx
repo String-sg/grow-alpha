@@ -2,7 +2,7 @@ import { adminService } from '@/services/adminService';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'expo-router';
 import * as DocumentPicker from 'expo-document-picker';
-import { ArrowLeft, CheckCircle, Loader, Minus, Plus, Upload } from 'lucide-react-native';
+import { ArrowLeft, CheckCircle, Minus, Plus, Upload } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Alert, ScrollView, Text, TextInput, TouchableOpacity, View, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -28,6 +28,17 @@ export default function AddContentScreen() {
   const [sources, setSources] = useState<PodcastSource[]>([
     { title: '', url: '', type: 'article', author: '', publishedDate: '' }
   ]);
+
+  // File handling
+  const [selectedAudioFile, setSelectedAudioFile] = useState<DocumentPicker.DocumentPickerResult | null>(null);
+  const [selectedImageFile, setSelectedImageFile] = useState<DocumentPicker.DocumentPickerResult | null>(null);
+
+  // Form state
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitProgress, setSubmitProgress] = useState<{
+    step: 'validation' | 'audio_upload' | 'image_upload' | 'database_creation' | 'complete';
+    message: string;
+  } | null>(null);
 
   // Redirect non-admin users
   React.useEffect(() => {
@@ -62,31 +73,147 @@ export default function AddContentScreen() {
     setSources(updatedSources);
   };
 
-  const handleSubmit = () => {
-    const podcastData = {
-      title,
-      description,
-      author,
-      category,
-      imageUrl,
-      sources: sources.filter(source => source.title || source.url), // Only include non-empty sources
-      // Note: audioUrl and duration would be handled by file upload
-    };
+  const handleAudioFilePicker = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: ['audio/*'],
+        copyToCacheDirectory: true,
+      });
 
-    Alert.alert(
-      'Feature Coming Soon',
-      'Podcast creation functionality will be available in the next update.\n\nPodcast Data:\n' +
-      `Title: ${title}\nAuthor: ${author}\nCategory: ${category}\nSources: ${podcastData.sources.length} items`,
-      [{ text: 'OK' }]
-    );
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        setSelectedAudioFile(result);
+        console.log('Audio file selected:', result.assets[0].name);
+      }
+    } catch (error) {
+      console.error('Error picking audio file:', error);
+      Alert.alert('Error', 'Failed to select audio file. Please try again.');
+    }
   };
 
-  const handleFileUpload = () => {
-    Alert.alert(
-      'Feature Coming Soon',
-      'File upload functionality will be available in the next update.',
-      [{ text: 'OK' }]
-    );
+  const handleImageFilePicker = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: ['image/*'],
+        copyToCacheDirectory: true,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        setSelectedImageFile(result);
+        console.log('Image file selected:', result.assets[0].name);
+      }
+    } catch (error) {
+      console.error('Error picking image file:', error);
+      Alert.alert('Error', 'Failed to select image file. Please try again.');
+    }
+  };
+
+  const validateForm = (): { isValid: boolean; error?: string } => {
+    if (!title.trim()) return { isValid: false, error: 'Title is required' };
+    if (!description.trim()) return { isValid: false, error: 'Description is required' };
+    if (!author.trim()) return { isValid: false, error: 'Author is required' };
+    if (!selectedAudioFile) return { isValid: false, error: 'Audio file is required' };
+
+    return { isValid: true };
+  };
+
+  const handleSubmit = async () => {
+    // Validate form
+    const validation = validateForm();
+    if (!validation.isValid) {
+      Alert.alert('Validation Error', validation.error);
+      return;
+    }
+
+    if (!selectedAudioFile?.assets?.[0]) {
+      Alert.alert('Error', 'Please select an audio file');
+      return;
+    }
+
+    if (!user?.email) {
+      Alert.alert('Error', 'User email not found');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmitProgress({ step: 'validation', message: 'Validating form data...' });
+
+    try {
+      const adminPodcastData = {
+        title: title.trim(),
+        description: description.trim(),
+        author: author.trim(),
+        category: category.trim() || undefined,
+        imageUrl: selectedImageFile?.assets?.[0]?.uri || imageUrl || undefined,
+        audioFileUri: selectedAudioFile.assets[0].uri,
+        sources: sources
+          .filter(source => source.title.trim() || source.url.trim())
+          .map(source => ({
+            title: source.title.trim(),
+            url: source.url.trim(),
+            type: source.type,
+            author: source.author.trim() || undefined,
+            published_date: source.publishedDate.trim() || undefined,
+          })),
+      };
+
+      setSubmitProgress({ step: 'audio_upload', message: 'Uploading audio file...' });
+
+      console.log('📝 Creating podcast with data:', {
+        ...adminPodcastData,
+        audioFileUri: '[FILE_URI]', // Don't log the full URI
+      });
+
+      const result = await adminService.createPodcast(adminPodcastData, user.email);
+
+      if (result.success) {
+        setSubmitProgress({ step: 'complete', message: 'Podcast created successfully!' });
+
+        // Show success message
+        Alert.alert(
+          '🎉 Success!',
+          `Podcast "${title}" has been created successfully and is now available in the app.`,
+          [
+            {
+              text: 'Create Another',
+              onPress: () => {
+                // Reset form
+                setTitle('');
+                setDescription('');
+                setAuthor('');
+                setCategory('');
+                setImageUrl('');
+                setSources([{ title: '', url: '', type: 'article', author: '', publishedDate: '' }]);
+                setSelectedAudioFile(null);
+                setSelectedImageFile(null);
+                setSubmitProgress(null);
+              },
+            },
+            {
+              text: 'Go Back',
+              onPress: () => router.back(),
+            },
+          ]
+        );
+      } else {
+        console.error('❌ Podcast creation failed:', result);
+
+        Alert.alert(
+          'Creation Failed',
+          result.error || 'An unknown error occurred during podcast creation.',
+          [{ text: 'OK' }]
+        );
+      }
+    } catch (error) {
+      console.error('❌ Unexpected error during podcast creation:', error);
+
+      Alert.alert(
+        'Unexpected Error',
+        'An unexpected error occurred. Please check your internet connection and try again.',
+        [{ text: 'OK' }]
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Don't render if not admin
@@ -178,14 +305,82 @@ export default function AddContentScreen() {
           <View className="mb-6">
             <Text className="text-gray-700 text-base font-medium mb-2">Audio File *</Text>
             <TouchableOpacity
-              onPress={handleFileUpload}
-              className="w-full py-4 border-2 border-dashed border-gray-300 rounded-lg items-center justify-center bg-gray-50"
+              onPress={handleAudioFilePicker}
+              disabled={isSubmitting}
+              className={`w-full py-4 border-2 border-dashed rounded-lg items-center justify-center ${
+                selectedAudioFile
+                  ? 'border-green-300 bg-green-50'
+                  : 'border-gray-300 bg-gray-50'
+              } ${isSubmitting ? 'opacity-50' : ''}`}
               activeOpacity={0.8}
             >
-              <Upload size={24} color="#9CA3AF" />
-              <Text className="text-gray-500 mt-2">Tap to upload audio file</Text>
-              <Text className="text-gray-400 text-sm mt-1">MP3, WAV, or M4A</Text>
+              {selectedAudioFile ? (
+                <>
+                  <CheckCircle size={24} color="#16A34A" />
+                  <Text className="text-green-700 mt-2 font-medium">
+                    {selectedAudioFile.assets?.[0]?.name || 'Audio file selected'}
+                  </Text>
+                  <Text className="text-green-600 text-sm mt-1">
+                    {selectedAudioFile.assets?.[0]?.size
+                      ? `${Math.round((selectedAudioFile.assets[0].size / 1024 / 1024) * 100) / 100} MB`
+                      : 'Ready to upload'}
+                  </Text>
+                </>
+              ) : (
+                <>
+                  <Upload size={24} color="#9CA3AF" />
+                  <Text className="text-gray-500 mt-2">Tap to select audio file</Text>
+                  <Text className="text-gray-400 text-sm mt-1">MP3, WAV, or M4A</Text>
+                </>
+              )}
             </TouchableOpacity>
+          </View>
+
+          {/* Cover Image Upload */}
+          <View className="mb-6">
+            <Text className="text-gray-700 text-base font-medium mb-2">Cover Image (Optional)</Text>
+            <TouchableOpacity
+              onPress={handleImageFilePicker}
+              disabled={isSubmitting}
+              className={`w-full py-4 border-2 border-dashed rounded-lg items-center justify-center ${
+                selectedImageFile
+                  ? 'border-green-300 bg-green-50'
+                  : 'border-gray-300 bg-gray-50'
+              } ${isSubmitting ? 'opacity-50' : ''}`}
+              activeOpacity={0.8}
+            >
+              {selectedImageFile ? (
+                <>
+                  <CheckCircle size={24} color="#16A34A" />
+                  <Text className="text-green-700 mt-2 font-medium">
+                    {selectedImageFile.assets?.[0]?.name || 'Image file selected'}
+                  </Text>
+                  <Text className="text-green-600 text-sm mt-1">
+                    {selectedImageFile.assets?.[0]?.size
+                      ? `${Math.round((selectedImageFile.assets[0].size / 1024 / 1024) * 100) / 100} MB`
+                      : 'Ready to upload'}
+                  </Text>
+                </>
+              ) : (
+                <>
+                  <Upload size={24} color="#9CA3AF" />
+                  <Text className="text-gray-500 mt-2">Tap to select cover image</Text>
+                  <Text className="text-gray-400 text-sm mt-1">JPG, PNG, or WEBP</Text>
+                </>
+              )}
+            </TouchableOpacity>
+
+            {/* Alternative Image URL Input */}
+            <Text className="text-gray-600 text-center text-sm my-2">or enter image URL:</Text>
+            <TextInput
+              value={imageUrl}
+              onChangeText={setImageUrl}
+              placeholder="https://picsum.photos/400/400?random=1"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 bg-white"
+              placeholderTextColor="#9CA3AF"
+              autoCapitalize="none"
+              editable={!isSubmitting}
+            />
           </View>
 
           {/* Sources Section */}
@@ -276,24 +471,52 @@ export default function AddContentScreen() {
             ))}
           </View>
 
+          {/* Progress Indicator */}
+          {submitProgress && (
+            <View className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <View className="flex-row items-center mb-2">
+                <ActivityIndicator size="small" color="#2563EB" />
+                <Text className="text-blue-800 font-medium ml-2">
+                  {submitProgress.step === 'validation' && 'Validating...'}
+                  {submitProgress.step === 'audio_upload' && 'Uploading Audio...'}
+                  {submitProgress.step === 'image_upload' && 'Uploading Image...'}
+                  {submitProgress.step === 'database_creation' && 'Saving to Database...'}
+                  {submitProgress.step === 'complete' && 'Complete!'}
+                </Text>
+              </View>
+              <Text className="text-blue-700 text-sm">{submitProgress.message}</Text>
+            </View>
+          )}
+
           {/* Submit Button */}
           <TouchableOpacity
             onPress={handleSubmit}
-            className="w-full bg-blue-600 py-4 rounded-lg items-center justify-center mt-4"
+            disabled={isSubmitting}
+            className={`w-full py-4 rounded-lg items-center justify-center mt-4 flex-row ${
+              isSubmitting ? 'bg-gray-400' : 'bg-blue-600'
+            }`}
             activeOpacity={0.8}
           >
-            <Text className="text-white font-semibold text-lg">Create Podcast</Text>
+            {isSubmitting ? (
+              <>
+                <ActivityIndicator size="small" color="white" />
+                <Text className="text-white font-semibold text-lg ml-2">Creating...</Text>
+              </>
+            ) : (
+              <Text className="text-white font-semibold text-lg">Create Podcast</Text>
+            )}
           </TouchableOpacity>
 
-          {/* Coming Soon Notice */}
-          <View className="mt-6 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-            <Text className="text-yellow-800 font-medium mb-1">🚧 Development in Progress</Text>
-            <Text className="text-yellow-700 text-sm">
-              This podcast creation form matches your existing data structure. Features coming soon:
-              {'\n'}• Audio file upload and processing
+          {/* Form Instructions */}
+          <View className="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
+            <Text className="text-green-800 font-medium mb-1">✨ Fully Functional</Text>
+            <Text className="text-green-700 text-sm">
+              This form creates real podcasts with:
+              {'\n'}• Audio file upload to Cloudinary
               {'\n'}• Automatic duration detection
-              {'\n'}• Database storage integration
-              {'\n'}• ID generation and validation
+              {'\n'}• Database storage with UUID generation
+              {'\n'}• Source references and metadata
+              {'\n'}• Admin activity logging
             </Text>
           </View>
         </View>

@@ -1,12 +1,12 @@
-import { v2 as cloudinary } from 'cloudinary';
 import Constants from 'expo-constants';
 
-// Configure Cloudinary
-cloudinary.config({
+// Cloudinary configuration - using direct API calls instead of SDK
+const CLOUDINARY_CONFIG = {
   cloud_name: Constants.expoConfig?.extra?.cloudinaryCloudName,
   api_key: Constants.expoConfig?.extra?.cloudinaryApiKey,
   api_secret: Constants.expoConfig?.extra?.cloudinaryApiSecret,
-});
+  upload_url: `https://api.cloudinary.com/v1_1/${Constants.expoConfig?.extra?.cloudinaryCloudName}/upload`,
+};
 
 export interface CloudinaryUploadResult {
   public_id: string;
