@@ -84,7 +84,14 @@ export default function HomeScreen() {
     });
     
     // Use the existing audio system
-    await playContent(podcastFormat);
+    try {
+      console.log('🎵 Attempting to play content:', podcastFormat.title);
+      await playContent(podcastFormat);
+      console.log('🎵 Successfully started playback');
+    } catch (error) {
+      console.error('🎵 Failed to play content:', error);
+      Alert.alert('Playback Error', 'Failed to start audio playback. Please try again.');
+    }
   };
 
   const handleDeleteContent = async (content: EducationalContent) => {
