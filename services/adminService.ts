@@ -120,6 +120,18 @@ class AdminService {
         };
       }
 
+      // Step 5: Create quiz if provided
+      if (podcastData.quiz && podcastData.quiz.length > 0) {
+        console.log('📝 Creating quiz with', podcastData.quiz.length, 'questions...');
+        try {
+          await quizService.createQuiz(createdPodcast.id, podcastData.quiz);
+          console.log('✅ Quiz created successfully for podcast:', createdPodcast.id);
+        } catch (error) {
+          console.warn('⚠️ Quiz creation failed, but podcast was created successfully:', error);
+          // Don't fail the entire process if quiz creation fails
+        }
+      }
+
       console.log('✅ Podcast created successfully:', createdPodcast.id);
 
       return {

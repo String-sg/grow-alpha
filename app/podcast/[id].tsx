@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNotes } from '@/contexts/NotesContext';
 import { educationalContent, EducationalContent } from '@/data/educational-content';
 import { mockQuizzes } from '@/data/quizzes';
+import { contentService } from '@/services/contentService';
 import { getScriptByPodcastId } from '@/data/scripts';
 import { useAudio } from '@/hooks/useAudio';
 import { Note } from '@/types/notes';
