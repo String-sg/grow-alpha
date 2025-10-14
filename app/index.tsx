@@ -1,3 +1,4 @@
+import { DeleteConfirmationModal } from '@/components/DeleteConfirmationModal';
 import { EducationalCard } from '@/components/EducationalCard';
 import { ProfileHeader } from '@/components/ProfileHeader';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
@@ -20,6 +21,9 @@ export default function HomeScreen() {
   const { user, isAdmin } = useAuth();
   const [recentlyPlayed, setRecentlyPlayed] = useState<{ id: string; title: string; timestamp: number; imageUrl: string; category: string; author: string }[]>([]);
   const [allContent, setAllContent] = useState<EducationalContent[]>(educationalContent);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [contentToDelete, setContentToDelete] = useState<EducationalContent | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Load hybrid content (database + static) on mount
   useEffect(() => {
@@ -80,22 +84,15 @@ export default function HomeScreen() {
     
     // Use the existing audio system
     try {
-      console.log('🎵 Attempting to play content:', podcastFormat.title);
       await playContent(podcastFormat);
-      console.log('🎵 Successfully started playback');
     } catch (error) {
-      console.error('🎵 Failed to play content:', error);
+      console.error('Failed to play content:', error);
       Alert.alert('Playback Error', 'Failed to start audio playback. Please try again.');
     }
   };
 
-  const handleDeleteContent = async (content: EducationalContent) => {
-    console.log('🗑️ handleDeleteContent called for:', content.title);
-    console.log('🗑️ isAdmin:', isAdmin, 'user email:', user?.email);
-    console.log('🗑️ content.isFromDatabase:', content.isFromDatabase);
-
+  const handleDeleteContent = (content: EducationalContent) => {
     if (!isAdmin || !user?.email) {
-      console.log('🗑️ Permission denied');
       Alert.alert('Error', 'You do not have permission to delete content.');
       return;
     }
@@ -106,70 +103,57 @@ export default function HomeScreen() {
       return;
     }
 
-    console.log('🗑️ About to show confirmation dialog');
-    console.log('🗑️ Platform:', Platform.OS);
+    // Show custom delete confirmation modal
+    setContentToDelete(content);
+    setShowDeleteModal(true);
+  };
 
-    // Use web-compatible confirmation dialog
-    if (Platform.OS === 'web') {
-      const confirmed = window.confirm(`Are you sure you want to delete "${content.title}"? This action cannot be undone.`);
+  const handleConfirmDelete = async () => {
+    if (!contentToDelete || !user?.email) return;
 
-      if (confirmed) {
-        try {
-          const result = await adminService.deletePodcast(content.id, user.email);
+    setIsDeleting(true);
+    try {
+      const result = await adminService.deletePodcast(contentToDelete.id, user.email);
 
-          if (result.success) {
-            alert('Success: Podcast deleted successfully.');
+      if (result.success) {
+        // Remove from local state
+        setAllContent(prev => prev.filter(c => c.id !== contentToDelete.id));
+        setRecentlyPlayed(prev => prev.filter(r => r.id !== contentToDelete.id));
 
-            // Remove from local state
-            setAllContent(prev => prev.filter(c => c.id !== content.id));
-            setRecentlyPlayed(prev => prev.filter(r => r.id !== content.id));
-          } else {
-            alert('Error: ' + (result.error || 'Failed to delete podcast.'));
-          }
-        } catch (error) {
-          console.error('Delete error:', error);
-          alert('Error: An unexpected error occurred while deleting the podcast.');
+        // Close modal and show success
+        setShowDeleteModal(false);
+        setContentToDelete(null);
+
+        // Show success message
+        if (Platform.OS === 'web') {
+          alert('Success: Podcast deleted successfully.');
+        } else {
+          Alert.alert('Success', 'Podcast deleted successfully.');
         }
       } else {
-        console.log('🗑️ Delete cancelled (web)');
+        const errorMessage = 'Error: ' + (result.error || 'Failed to delete podcast.');
+        if (Platform.OS === 'web') {
+          alert(errorMessage);
+        } else {
+          Alert.alert('Error', result.error || 'Failed to delete podcast.');
+        }
       }
-    } else {
-      // Use native Alert for mobile platforms
-      Alert.alert(
-        'Delete Podcast',
-        `Are you sure you want to delete "${content.title}"? This action cannot be undone.`,
-        [
-          {
-            text: 'Cancel',
-            style: 'cancel',
-            onPress: () => console.log('🗑️ Delete cancelled'),
-          },
-          {
-            text: 'Delete',
-            style: 'destructive',
-            onPress: async () => {
-              console.log('🗑️ Delete confirmed (mobile), proceeding with deletion');
-              try {
-                const result = await adminService.deletePodcast(content.id, user.email);
-
-                if (result.success) {
-                  Alert.alert('Success', 'Podcast deleted successfully.');
-
-                  // Remove from local state
-                  setAllContent(prev => prev.filter(c => c.id !== content.id));
-                  setRecentlyPlayed(prev => prev.filter(r => r.id !== content.id));
-                } else {
-                  Alert.alert('Error', result.error || 'Failed to delete podcast.');
-                }
-              } catch (error) {
-                console.error('Delete error:', error);
-                Alert.alert('Error', 'An unexpected error occurred while deleting the podcast.');
-              }
-            },
-          },
-        ]
-      );
+    } catch (error) {
+      console.error('Delete error:', error);
+      const errorMessage = 'Error: An unexpected error occurred while deleting the podcast.';
+      if (Platform.OS === 'web') {
+        alert(errorMessage);
+      } else {
+        Alert.alert('Error', 'An unexpected error occurred while deleting the podcast.');
+      }
+    } finally {
+      setIsDeleting(false);
     }
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteModal(false);
+    setContentToDelete(null);
   };
 
 
@@ -295,12 +279,30 @@ export default function HomeScreen() {
   );
 
   if (Platform.OS === 'web') {
-    return content;
+    return (
+      <>
+        {content}
+        <DeleteConfirmationModal
+          visible={showDeleteModal}
+          onClose={handleCancelDelete}
+          podcastTitle={contentToDelete?.title || ''}
+          onConfirm={handleConfirmDelete}
+          isDeleting={isDeleting}
+        />
+      </>
+    );
   }
 
   return (
     <SafeAreaView className="flex-1">
       {content}
+      <DeleteConfirmationModal
+        visible={showDeleteModal}
+        onClose={handleCancelDelete}
+        podcastTitle={contentToDelete?.title || ''}
+        onConfirm={handleConfirmDelete}
+        isDeleting={isDeleting}
+      />
     </SafeAreaView>
   );
 }

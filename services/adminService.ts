@@ -168,9 +168,10 @@ class AdminService {
    */
   async deletePodcast(podcastId: string, adminEmail: string): Promise<{ success: boolean; error?: string }> {
     try {
-      console.log('🗑️ Deleting podcast:', podcastId);
+      console.log('🗑️ Admin delete podcast request:', { podcastId, adminEmail });
 
       // Validate admin permissions
+      console.log('🗑️ Validating admin user...');
       const adminUser = await userService.getUserByEmail(adminEmail);
       if (!adminUser) {
         return { success: false, error: 'Admin user not found' };
@@ -218,6 +219,12 @@ class AdminService {
 
     } catch (error) {
       console.error('❌ Admin podcast deletion failed:', error);
+      console.error('❌ Error details:', {
+        name: error instanceof Error ? error.name : 'Unknown',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : 'No stack trace'
+      });
+
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error'
