@@ -135,11 +135,54 @@ export default function AddContentScreen() {
     setIsSubmitting(false);
   };
 
+  const validateQuizJson = (jsonString: string): { isValid: boolean; error?: string; parsed?: any } => {
+    if (!jsonString.trim()) {
+      return { isValid: true }; // Quiz is optional
+    }
+
+    try {
+      const parsed = JSON.parse(jsonString);
+
+      if (!Array.isArray(parsed)) {
+        return { isValid: false, error: 'Quiz must be an array of questions' };
+      }
+
+      for (let i = 0; i < parsed.length; i++) {
+        const question = parsed[i];
+        if (!question.question || typeof question.question !== 'string') {
+          return { isValid: false, error: `Question ${i + 1}: Missing or invalid 'question' field` };
+        }
+        if (!Array.isArray(question.options) || question.options.length < 2) {
+          return { isValid: false, error: `Question ${i + 1}: 'options' must be an array with at least 2 items` };
+        }
+        if (typeof question.answer !== 'number' || question.answer < 0 || question.answer >= question.options.length) {
+          return { isValid: false, error: `Question ${i + 1}: 'answer' must be a valid index` };
+        }
+        if (!question.explanation || typeof question.explanation !== 'string') {
+          return { isValid: false, error: `Question ${i + 1}: Missing or invalid 'explanation' field` };
+        }
+        if (typeof question.order !== 'number') {
+          return { isValid: false, error: `Question ${i + 1}: Missing or invalid 'order' field` };
+        }
+      }
+
+      return { isValid: true, parsed };
+    } catch (error) {
+      return { isValid: false, error: 'Invalid JSON format' };
+    }
+  };
+
   const validateForm = (): { isValid: boolean; error?: string } => {
     if (!title.trim()) return { isValid: false, error: 'Title is required' };
     if (!description.trim()) return { isValid: false, error: 'Description is required' };
     if (!author.trim()) return { isValid: false, error: 'Author is required' };
     if (!selectedAudioFile) return { isValid: false, error: 'Audio file is required' };
+
+    // Validate quiz JSON if provided
+    const quizValidation = validateQuizJson(quizJson);
+    if (!quizValidation.isValid) {
+      return { isValid: false, error: `Quiz validation error: ${quizValidation.error}` };
+    }
 
     return { isValid: true };
   };
@@ -166,6 +209,13 @@ export default function AddContentScreen() {
     setSubmitProgress({ step: 'validation', message: 'Validating form data...' });
 
     try {
+      // Parse quiz JSON if provided
+      const quizValidation = validateQuizJson(quizJson);
+      let quizQuestions = undefined;
+      if (quizValidation.isValid && quizValidation.parsed) {
+        quizQuestions = quizValidation.parsed;
+      }
+
       const adminPodcastData = {
         title: title.trim(),
         description: description.trim(),
@@ -182,6 +232,7 @@ export default function AddContentScreen() {
             author: source.author.trim() || undefined,
             published_date: source.publishedDate.trim() || undefined,
           })),
+        quiz: quizQuestions,
       };
 
       setSubmitProgress({ step: 'audio_upload', message: 'Uploading audio file...' });

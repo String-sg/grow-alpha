@@ -18,6 +18,13 @@ export interface AdminPodcastCreationData {
     author?: string;
     published_date?: string;
   }[];
+  quiz?: {
+    question: string;
+    options: string[];
+    answer: number;
+    explanation: string;
+    order: number;
+  }[];
 }
 
 export interface AdminPodcastCreationResult {
