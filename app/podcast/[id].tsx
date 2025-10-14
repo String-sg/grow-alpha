@@ -219,7 +219,7 @@ export default function PodcastDetailsScreen() {
           setContent(staticContent || null);
           setDbQuiz(null);
         } finally {
-          setIsLoading(false);
+          setIsContentLoading(false);
         }
       }
     };
@@ -462,7 +462,7 @@ export default function PodcastDetailsScreen() {
   });
 
   // Show loading state while content is being fetched
-  if (isLoading) {
+  if (isContentLoading) {
     return (
       <View className="flex-1 justify-center items-center">
         <StatusBar barStyle="dark-content" />
@@ -487,7 +487,7 @@ export default function PodcastDetailsScreen() {
 
   const isThisPodcastCurrent = isCurrentPodcast(content.id);
   const isThisPodcastPlaying = isContentPlaying(content.id);
-  const isThisPodcastLoading = isThisPodcastCurrent && (isAudioLoading || isContentBuffering);
+  const isThisPodcastLoading = isThisPodcastCurrent && (isLoading || isContentBuffering);
   const hasQuiz = dbQuiz !== null || mockQuizzes.some(q => q.podcastId === content.id);
   
   // Check if mini player is visible (any podcast is currently loaded)
