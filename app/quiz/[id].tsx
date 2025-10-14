@@ -46,7 +46,36 @@ export default function QuizScreen() {
 
   const loadQuiz = useCallback(async () => {
     try {
-      const foundQuiz = mockQuizzes.find(q => q.id === id);
+      let foundQuiz: Quiz | null = null;
+
+      if (type === 'database') {
+        // Load quiz from database
+        try {
+          const dbQuiz = await quizService.getQuizByPodcastId(podcastId || '');
+          if (dbQuiz) {
+            // Convert database quiz to Quiz format
+            foundQuiz = {
+              id: dbQuiz.id,
+              podcastId: dbQuiz.podcast_id,
+              title: `Quiz for ${podcastId}`, // We'll need to get the podcast title
+              questions: dbQuiz.questions.map((q: any, index: number) => ({
+                id: `${dbQuiz.id}-q${index + 1}`,
+                question: q.question,
+                options: q.options,
+                correctAnswer: q.answer,
+                explanation: q.explanation,
+                order: q.order || index + 1,
+              })),
+            };
+          }
+        } catch (error) {
+          console.error('Failed to load database quiz:', error);
+        }
+      } else {
+        // Load from mock quizzes
+        foundQuiz = mockQuizzes.find(q => q.id === id) || null;
+      }
+
       if (!foundQuiz) {
         Alert.alert('Error', 'Quiz not found', [
           { text: 'OK', onPress: () => router.back() }
@@ -71,7 +100,7 @@ export default function QuizScreen() {
         { text: 'OK', onPress: () => router.back() }
       ]);
     }
-  }, [id]);
+  }, [id, type, podcastId]);
 
   useEffect(() => {
     loadQuiz();
