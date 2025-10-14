@@ -1,5 +1,7 @@
+import { useAuth } from '@/contexts/AuthContext';
 import { EducationalContent, getDaysAgo } from '@/data/educational-content';
 import { useAudio } from '@/hooks/useAudio';
+import { Trash2 } from 'lucide-react-native';
 import React from 'react';
 import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
 import CircularProgress from 'react-native-circular-progress-indicator';
@@ -9,6 +11,8 @@ interface EducationalCardProps {
   content: EducationalContent;
   onPress?: () => void;
   onPlayPress?: () => void;
+  onDelete?: () => void;
+  isFromDatabase?: boolean;
 }
 
 export const EducationalCard: React.FC<EducationalCardProps> = ({ 
