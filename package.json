@@ -12,12 +12,14 @@
     "build:web": "npx expo export --platform web",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:config": "node scripts/test-config.js"
+    "test:config": "node scripts/test-config.js",
+    "test:database": "node scripts/test-database.js"
   },
   "dependencies": {
     "@expo-google-fonts/geist": "^0.4.0",
     "@expo-google-fonts/geist-mono": "^0.4.0",
     "@google/generative-ai": "^0.24.1",
+    "@neondatabase/serverless": "^1.0.2",
     "@react-native-async-storage/async-storage": "^2.2.0",
     "@react-native-community/netinfo": "^11.4.1",
     "@react-native-community/slider": "^4.5.7",

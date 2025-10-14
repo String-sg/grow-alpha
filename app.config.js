@@ -40,6 +40,7 @@ export default {
       googleClientSecret: process.env.GOOGLE_CLIENT_SECRET,
       expoUsername: process.env.EXPO_USERNAME,
       nodeEnv: process.env.NODE_ENV,
+      databaseUrl: process.env.DATABASE_URL,
     },
   },
 }; 
