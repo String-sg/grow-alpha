@@ -1,5 +1,6 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'expo-router';
+import { Plus } from 'lucide-react-native';
 import React from 'react';
 import { Image, Text, TouchableOpacity, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
@@ -10,7 +11,7 @@ interface ProfileHeaderProps {
 
 export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ onProfilePress }) => {
   const router = useRouter();
-  const { user, isDemoMode } = useAuth();
+  const { user, isDemoMode, isAdmin } = useAuth();
   
   const handleProfilePress = () => {
     if (onProfilePress) {
@@ -18,6 +19,10 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ onProfilePress }) 
     } else {
       router.push('/profile');
     }
+  };
+
+  const handleAdminPress = () => {
+    router.push('/admin/add-content');
   };
   return (
     <View className="flex-row items-center justify-between mx-6 mt-5 mb-4">
