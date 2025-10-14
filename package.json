@@ -12,7 +12,8 @@
     "build:web": "npx expo export --platform web",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:config": "node scripts/test-config.js"
+    "test:config": "node scripts/test-config.js",
+    "test:database": "node scripts/test-database.js"
   },
   "dependencies": {
     "@expo-google-fonts/geist": "^0.4.0",
