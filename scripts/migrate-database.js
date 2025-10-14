@@ -121,10 +121,11 @@ async function runMigration() {
     await sql`CREATE INDEX IF NOT EXISTS idx_podcast_sources_podcast_id ON podcast_sources(podcast_id);`;
     await sql`CREATE INDEX IF NOT EXISTS idx_admin_logs_admin_id ON admin_logs(admin_id);`;
     await sql`CREATE INDEX IF NOT EXISTS idx_admin_logs_created_at ON admin_logs(created_at);`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_quizzes_podcast_id ON quizzes(podcast_id);`;
     console.log('✅ Indexes created\n');
 
-    // Step 7: Show current admin users
-    console.log('7. Current admin users:');
+    // Step 8: Show current admin users
+    console.log('8. Current admin users:');
     const adminUsers = await sql`
       SELECT email, name, is_admin, created_at
       FROM users
