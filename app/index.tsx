@@ -111,23 +111,15 @@ export default function HomeScreen() {
       return;
     }
 
-    console.log('🗑️ About to show Alert.alert confirmation');
+    console.log('🗑️ About to show confirmation dialog');
     console.log('🗑️ Platform:', Platform.OS);
 
-    Alert.alert(
-      'Delete Podcast',
-      `Are you sure you want to delete "${content.title}"? This action cannot be undone.`,
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-          onPress: () => console.log('🗑️ Delete cancelled'),
-        },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            console.log('🗑️ Delete confirmed, proceeding with deletion');
+    // Use web-compatible confirmation dialog
+    if (Platform.OS === 'web') {
+      const confirmed = window.confirm(`Are you sure you want to delete "${content.title}"? This action cannot be undone.`);
+
+      if (confirmed) {
+        console.log('🗑️ Delete confirmed (web), proceeding with deletion');
             try {
               const result = await adminService.deletePodcast(content.id, user.email);
 
