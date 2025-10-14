@@ -27,6 +27,7 @@ class ContentService {
       progress: 0,
       publishedDate: this.formatPublishDate(podcast.created_at),
       createdAt: new Date(podcast.created_at),
+      isFromDatabase: true, // Mark as database content for admin controls
       sources: podcast.sources?.map(source => ({
         title: source.title,
         url: source.url,
