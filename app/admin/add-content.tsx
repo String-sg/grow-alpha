@@ -121,44 +121,13 @@ export default function AddContentScreen() {
 
         {/* Form Content */}
         <View className="px-6 py-6">
-          {/* Content Type Selection */}
-          <View className="mb-6">
-            <Text className="text-gray-700 text-base font-medium mb-3">Content Type</Text>
-            <View className="flex-row gap-3">
-              {[
-                { key: 'podcast', label: 'Podcast' },
-                { key: 'quiz', label: 'Quiz' },
-                { key: 'educational', label: 'Educational' },
-              ].map((type) => (
-                <TouchableOpacity
-                  key={type.key}
-                  onPress={() => setContentType(type.key as any)}
-                  className={`px-4 py-2 rounded-lg border ${
-                    contentType === type.key
-                      ? 'bg-blue-600 border-blue-600'
-                      : 'bg-white border-gray-300'
-                  }`}
-                  activeOpacity={0.8}
-                >
-                  <Text
-                    className={`font-medium ${
-                      contentType === type.key ? 'text-white' : 'text-gray-700'
-                    }`}
-                  >
-                    {type.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-
           {/* Title Field */}
           <View className="mb-6">
-            <Text className="text-gray-700 text-base font-medium mb-2">Title</Text>
+            <Text className="text-gray-700 text-base font-medium mb-2">Title *</Text>
             <TextInput
               value={title}
               onChangeText={setTitle}
-              placeholder="Enter content title"
+              placeholder="Enter podcast title"
               className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 bg-white"
               placeholderTextColor="#9CA3AF"
             />
@@ -166,60 +135,157 @@ export default function AddContentScreen() {
 
           {/* Description Field */}
           <View className="mb-6">
-            <Text className="text-gray-700 text-base font-medium mb-2">Description</Text>
+            <Text className="text-gray-700 text-base font-medium mb-2">Description *</Text>
             <TextInput
               value={description}
               onChangeText={setDescription}
-              placeholder="Enter content description"
+              placeholder="Enter detailed podcast description and learning outcomes"
               multiline
-              numberOfLines={4}
+              numberOfLines={6}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 bg-white"
               placeholderTextColor="#9CA3AF"
               textAlignVertical="top"
             />
           </View>
 
-          {/* File Upload Section */}
-          {contentType === 'podcast' && (
-            <View className="mb-6">
-              <Text className="text-gray-700 text-base font-medium mb-2">Audio File</Text>
+          {/* Author Field */}
+          <View className="mb-6">
+            <Text className="text-gray-700 text-base font-medium mb-2">Author *</Text>
+            <TextInput
+              value={author}
+              onChangeText={setAuthor}
+              placeholder="e.g., Kahhow, SDCD (Demo), Education Technology Team"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 bg-white"
+              placeholderTextColor="#9CA3AF"
+            />
+          </View>
+
+          {/* Category Field */}
+          <View className="mb-6">
+            <Text className="text-gray-700 text-base font-medium mb-2">Category</Text>
+            <TextInput
+              value={category}
+              onChangeText={setCategory}
+              placeholder="e.g., Artificial Intelligence, Student Well-being, Special Educational Needs"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 bg-white"
+              placeholderTextColor="#9CA3AF"
+            />
+          </View>
+
+          {/* Image URL Field */}
+          <View className="mb-6">
+            <Text className="text-gray-700 text-base font-medium mb-2">Cover Image URL</Text>
+            <TextInput
+              value={imageUrl}
+              onChangeText={setImageUrl}
+              placeholder="https://picsum.photos/400/400?random=1"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 bg-white"
+              placeholderTextColor="#9CA3AF"
+              autoCapitalize="none"
+            />
+          </View>
+
+          {/* Audio File Upload */}
+          <View className="mb-6">
+            <Text className="text-gray-700 text-base font-medium mb-2">Audio File *</Text>
+            <TouchableOpacity
+              onPress={handleFileUpload}
+              className="w-full py-4 border-2 border-dashed border-gray-300 rounded-lg items-center justify-center bg-gray-50"
+              activeOpacity={0.8}
+            >
+              <Upload size={24} color="#9CA3AF" />
+              <Text className="text-gray-500 mt-2">Tap to upload audio file</Text>
+              <Text className="text-gray-400 text-sm mt-1">MP3, WAV, or M4A</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Sources Section */}
+          <View className="mb-6">
+            <View className="flex-row items-center justify-between mb-3">
+              <Text className="text-gray-700 text-base font-medium">Sources & References</Text>
               <TouchableOpacity
-                onPress={handleFileUpload}
-                className="w-full py-4 border-2 border-dashed border-gray-300 rounded-lg items-center justify-center bg-gray-50"
+                onPress={addSource}
+                className="flex-row items-center px-3 py-1 bg-blue-100 rounded-lg"
                 activeOpacity={0.8}
               >
-                <Upload size={24} color="#9CA3AF" />
-                <Text className="text-gray-500 mt-2">Tap to upload audio file</Text>
-                <Text className="text-gray-400 text-sm mt-1">MP3, WAV, or M4A</Text>
+                <Plus size={16} color="#2563EB" />
+                <Text className="text-blue-600 ml-1 text-sm">Add Source</Text>
               </TouchableOpacity>
             </View>
-          )}
 
-          {/* Quiz-specific fields */}
-          {contentType === 'quiz' && (
-            <View className="mb-6 p-4 bg-gray-50 rounded-lg">
-              <Text className="text-gray-600 text-sm">
-                📝 Quiz creation interface will include:
-                {'\n'}• Multiple choice questions
-                {'\n'}• Correct answer selection
-                {'\n'}• Explanation text
-                {'\n'}• Difficulty level
-              </Text>
-            </View>
-          )}
+            {sources.map((source, index) => (
+              <View key={index} className="mb-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                <View className="flex-row items-center justify-between mb-3">
+                  <Text className="text-gray-600 font-medium">Source {index + 1}</Text>
+                  {sources.length > 1 && (
+                    <TouchableOpacity
+                      onPress={() => removeSource(index)}
+                      className="p-1"
+                      activeOpacity={0.8}
+                    >
+                      <Minus size={16} color="#DC2626" />
+                    </TouchableOpacity>
+                  )}
+                </View>
 
-          {/* Educational content-specific fields */}
-          {contentType === 'educational' && (
-            <View className="mb-6 p-4 bg-gray-50 rounded-lg">
-              <Text className="text-gray-600 text-sm">
-                📚 Educational content will include:
-                {'\n'}• Rich text editor
-                {'\n'}• Image uploads
-                {'\n'}• Video embedding
-                {'\n'}• Interactive elements
-              </Text>
-            </View>
-          )}
+                <TextInput
+                  value={source.title}
+                  onChangeText={(value) => updateSource(index, 'title', value)}
+                  placeholder="Source title"
+                  className="w-full px-3 py-2 mb-2 border border-gray-300 rounded bg-white text-gray-900"
+                  placeholderTextColor="#9CA3AF"
+                />
+
+                <TextInput
+                  value={source.url}
+                  onChangeText={(value) => updateSource(index, 'url', value)}
+                  placeholder="https://..."
+                  className="w-full px-3 py-2 mb-2 border border-gray-300 rounded bg-white text-gray-900"
+                  placeholderTextColor="#9CA3AF"
+                  autoCapitalize="none"
+                />
+
+                <View className="flex-row gap-2 mb-2">
+                  <TextInput
+                    value={source.author}
+                    onChangeText={(value) => updateSource(index, 'author', value)}
+                    placeholder="Author"
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded bg-white text-gray-900"
+                    placeholderTextColor="#9CA3AF"
+                  />
+
+                  <TextInput
+                    value={source.publishedDate}
+                    onChangeText={(value) => updateSource(index, 'publishedDate', value)}
+                    placeholder="2025"
+                    className="w-20 px-3 py-2 border border-gray-300 rounded bg-white text-gray-900"
+                    placeholderTextColor="#9CA3AF"
+                  />
+                </View>
+
+                <View className="flex-row flex-wrap gap-2">
+                  {['article', 'website', 'research', 'study', 'book', 'video', 'intranet', 'other'].map((type) => (
+                    <TouchableOpacity
+                      key={type}
+                      onPress={() => updateSource(index, 'type', type)}
+                      className={`px-3 py-1 rounded-full ${
+                        source.type === type
+                          ? 'bg-blue-600'
+                          : 'bg-gray-200'
+                      }`}
+                      activeOpacity={0.8}
+                    >
+                      <Text className={`text-xs ${
+                        source.type === type ? 'text-white' : 'text-gray-600'
+                      }`}>
+                        {type}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+            ))}
+          </View>
 
           {/* Submit Button */}
           <TouchableOpacity
@@ -227,14 +293,18 @@ export default function AddContentScreen() {
             className="w-full bg-blue-600 py-4 rounded-lg items-center justify-center mt-4"
             activeOpacity={0.8}
           >
-            <Text className="text-white font-semibold text-lg">Create Content</Text>
+            <Text className="text-white font-semibold text-lg">Create Podcast</Text>
           </TouchableOpacity>
 
           {/* Coming Soon Notice */}
           <View className="mt-6 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
             <Text className="text-yellow-800 font-medium mb-1">🚧 Development in Progress</Text>
             <Text className="text-yellow-700 text-sm">
-              This is a preview of the admin content management system. Full functionality will be available in the next update.
+              This podcast creation form matches your existing data structure. Features coming soon:
+              {'\n'}• Audio file upload and processing
+              {'\n'}• Automatic duration detection
+              {'\n'}• Database storage integration
+              {'\n'}• ID generation and validation
             </Text>
           </View>
         </View>
