@@ -8,15 +8,16 @@ import { useAuth } from '@/contexts/AuthContext';
 import { EducationalContent, educationalContent, weeklyProgress } from '@/data/educational-content';
 import { useAudio } from '@/hooks/useAudio';
 import { contentService } from '@/services/contentService';
+import { adminService } from '@/services/adminService';
 import { getFeedbackFormUrl } from '@/utils/feedback';
 import { useRouter } from 'expo-router';
 import React, { useState, useEffect } from 'react';
-import { Linking, Platform, SafeAreaView, StatusBar, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Linking, Platform, SafeAreaView, StatusBar, Text, TouchableOpacity, View } from 'react-native';
 
 export default function HomeScreen() {
   const router = useRouter();
   const { currentPodcast, playContent } = useAudio();
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const [recentlyPlayed, setRecentlyPlayed] = useState<{ id: string; title: string; timestamp: number; imageUrl: string; category: string; author: string }[]>([]);
   const [allContent, setAllContent] = useState<EducationalContent[]>(educationalContent);
   const [isLoadingContent, setIsLoadingContent] = useState(false);
@@ -79,6 +80,52 @@ export default function HomeScreen() {
     await playContent(podcastFormat);
   };
 
+  const handleDeleteContent = async (content: EducationalContent) => {
+    if (!isAdmin || !user?.email) {
+      Alert.alert('Error', 'You do not have permission to delete content.');
+      return;
+    }
+
+    // Only allow deletion of database content (content with isFromDatabase flag)
+    if (!content.isFromDatabase) {
+      Alert.alert('Error', 'Only database content can be deleted.');
+      return;
+    }
+
+    Alert.alert(
+      'Delete Podcast',
+      `Are you sure you want to delete "${content.title}"? This action cannot be undone.`,
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const result = await adminService.deletePodcast(content.id, user.email);
+
+              if (result.success) {
+                Alert.alert('Success', 'Podcast deleted successfully.');
+
+                // Remove from local state
+                setAllContent(prev => prev.filter(c => c.id !== content.id));
+                setRecentlyPlayed(prev => prev.filter(r => r.id !== content.id));
+              } else {
+                Alert.alert('Error', result.error || 'Failed to delete podcast.');
+              }
+            } catch (error) {
+              console.error('Delete error:', error);
+              Alert.alert('Error', 'An unexpected error occurred while deleting the podcast.');
+            }
+          },
+        },
+      ]
+    );
+  };
+
 
 
 
@@ -133,6 +180,8 @@ export default function HomeScreen() {
                     content={content}
                     onPress={() => handleContentPress(content)}
                     onPlayPress={() => handlePlayPress(content)}
+                    onDelete={() => handleDeleteContent(content)}
+                    isFromDatabase={content.isFromDatabase}
                   />
                 );
               })}
@@ -172,6 +221,8 @@ export default function HomeScreen() {
                       content={content}
                       onPress={() => handleContentPress(content)}
                       onPlayPress={() => handlePlayPress(content)}
+                      onDelete={() => handleDeleteContent(content)}
+                      isFromDatabase={content.isFromDatabase}
                     />
                   ))}
                   

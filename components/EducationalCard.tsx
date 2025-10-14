@@ -15,23 +15,25 @@ interface EducationalCardProps {
   isFromDatabase?: boolean;
 }
 
-export const EducationalCard: React.FC<EducationalCardProps> = ({ 
-  content, 
+export const EducationalCard: React.FC<EducationalCardProps> = ({
+  content,
   onPress,
-  onPlayPress 
+  onPlayPress,
+  onDelete,
+  isFromDatabase
 }) => {
   // Ensure yellow classes are included: bg-yellow-50 bg-yellow-100 bg-yellow-200 bg-yellow-300 text-yellow-900
-  const { 
-    isContentPlaying, 
-    isCurrentPodcast, 
-    togglePlayPause, 
+  const {
+    isContentPlaying,
+    isCurrentPodcast,
     isLoading,
     isContentBuffering,
     getFormattedRemainingTime,
     getProgress,
-    currentTime,
-    duration 
+    duration
   } = useAudio();
+
+  const { isAdmin } = useAuth();
 
   const isThisPodcastCurrent = isCurrentPodcast(content.id);
   const isThisPodcastPlaying = isContentPlaying(content.id);
@@ -124,18 +126,34 @@ export const EducationalCard: React.FC<EducationalCardProps> = ({
       {/* Header Section */}
       <View className="pt-6 pb-1 px-6">
         <View className="flex-col gap-1">
-          {/* Category Badge */}
-          <View className={`${content.badgeColor} self-start rounded-md px-2.5 py-0.5`}>
-            <Text className={`${content.textColor} text-xs font-geist-semibold`}>
-              {content.category}
-            </Text>
+          {/* Category Badge and Delete Button Row */}
+          <View className="flex-row items-start justify-between">
+            <View className={`${content.badgeColor} self-start rounded-md px-2.5 py-0.5`}>
+              <Text className={`${content.textColor} text-xs font-geist-semibold`}>
+                {content.category}
+              </Text>
+            </View>
+
+            {/* Admin Delete Button */}
+            {isAdmin && isFromDatabase && onDelete && (
+              <TouchableOpacity
+                onPress={(e) => {
+                  e.stopPropagation();
+                  onDelete();
+                }}
+                className="w-8 h-8 items-center justify-center rounded-full bg-red-50 border border-red-200"
+                activeOpacity={0.7}
+              >
+                <Trash2 size={16} color="#dc2626" />
+              </TouchableOpacity>
+            )}
           </View>
-          
+
           {/* Title */}
           <Text className="text-slate-950 text-xl font-geist-medium leading-7 mt-1">
             {content.title}
           </Text>
-          
+
           {/* Author and Date */}
           <View className="flex-row items-center py-1.5 mt-1">
             <Text className="text-slate-600 text-sm font-geist">

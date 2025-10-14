@@ -58,7 +58,7 @@ export function PodcastCreationSuccessModal({
             style={{ fontFamily: 'Geist_500Medium' }}
             className="text-gray-900 text-center text-lg mb-8"
           >
-            "{podcastTitle}"
+            &ldquo;{podcastTitle}&rdquo;
           </Text>
 
           <Text className="text-gray-500 text-center text-sm mb-8">
