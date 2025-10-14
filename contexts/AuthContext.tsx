@@ -54,6 +54,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isDemoMode, setIsDemoMode] = useState(false);
   const [hasValidEmail, setHasValidEmail] = useState(false);
 
+  // Check if current user is admin
+  const isAdmin = user ? ADMIN_EMAILS.includes(user.email) : false;
+
   // Check network connectivity
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener(state => {
@@ -528,6 +531,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isOffline,
     isDemoMode,
     hasValidEmail,
+    isAdmin,
     login,
     logout,
     checkAuth,
