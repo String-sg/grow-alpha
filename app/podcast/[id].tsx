@@ -11,6 +11,7 @@ import { useNotes } from '@/contexts/NotesContext';
 import { educationalContent, EducationalContent } from '@/data/educational-content';
 import { mockQuizzes } from '@/data/quizzes';
 import { contentService } from '@/services/contentService';
+import { quizService } from '@/services/quizService';
 import { getScriptByPodcastId } from '@/data/scripts';
 import { useAudio } from '@/hooks/useAudio';
 import { Note } from '@/types/notes';
@@ -191,10 +192,22 @@ export default function PodcastDetailsScreen() {
   }, [getNotesForPodcast]);
 
   useEffect(() => {
-    if (id) {
-      const foundContent = educationalContent.find(c => c.id === id);
-      setContent(foundContent || null);
-    }
+    const loadContent = async () => {
+      if (id) {
+        try {
+          // Try to get content from hybrid service (database + static)
+          const foundContent = await contentService.getContentById(id, educationalContent);
+          setContent(foundContent);
+        } catch (error) {
+          console.error('Failed to load content:', error);
+          // Fallback to static content only
+          const staticContent = educationalContent.find(c => c.id === id);
+          setContent(staticContent || null);
+        }
+      }
+    };
+
+    loadContent();
   }, [id]);
 
   // Regenerate random rotations when notes change
