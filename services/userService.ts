@@ -176,38 +176,35 @@ class UserService {
     try {
       await this.ensureInitialized();
 
-      const setParts = [];
-      const values = [];
-
-      if (updates.name) {
-        setParts.push(`name = $${setParts.length + 1}`);
-        values.push(updates.name);
-      }
-
-      if (updates.email) {
-        setParts.push(`email = $${setParts.length + 1}`);
-        values.push(updates.email);
-
-        const domain = updates.email.split('@')[1];
-        setParts.push(`domain = $${setParts.length + 1}`);
-        values.push(domain);
-      }
-
-      setParts.push(`updated_at = NOW()`);
-      values.push(googleId);
-
-      if (setParts.length === 1) { // Only updated_at, no actual changes
+      // Check if there are any actual updates
+      if (!updates.name && !updates.email) {
         return await this.getUserByGoogleId(googleId);
       }
 
-      const query = `
-        UPDATE users
-        SET ${setParts.join(', ')}
-        WHERE google_id = $${values.length}
-        RETURNING *;
-      `;
+      // Build dynamic update query
+      let query = 'UPDATE users SET ';
+      const queryValues = [];
 
-      const result = await sql.unsafe(query, values);
+      if (updates.name) {
+        query += 'name = $' + (queryValues.length + 1) + ', ';
+        queryValues.push(updates.name);
+      }
+
+      if (updates.email) {
+        query += 'email = $' + (queryValues.length + 1) + ', ';
+        queryValues.push(updates.email);
+
+        const domain = updates.email.split('@')[1];
+        query += 'domain = $' + (queryValues.length + 1) + ', ';
+        queryValues.push(domain);
+      }
+
+      query += 'updated_at = NOW() WHERE google_id = $' + (queryValues.length + 1) + ' RETURNING *';
+      queryValues.push(googleId);
+
+      // For now, let's use a simpler approach with template strings
+      // This could be optimized later for better security
+      const result = await sql([query] as any, ...queryValues);
       return result[0] as DatabaseUser || null;
     } catch (error) {
       console.error('Failed to update user profile:', error);

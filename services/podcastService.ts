@@ -164,6 +164,10 @@ class PodcastService {
       // Get sources for all podcasts
       const podcastsWithSources = await Promise.all(
         podcasts.map(async (podcast) => {
+          if (!sql) {
+            return { ...podcast, sources: [] };
+          }
+
           const sources = await sql`
             SELECT * FROM podcast_sources
             WHERE podcast_id = ${podcast.id}
@@ -277,7 +281,9 @@ class PodcastService {
       query += 'updated_at = NOW() WHERE id = $' + (queryValues.length + 1) + ' RETURNING *';
       queryValues.push(id);
 
-      const result = await sql.unsafe(query, queryValues);
+      // For now, let's use a simpler approach with template strings
+      // This could be optimized later for better security
+      const result = await sql([query] as any, ...queryValues);
       const updatedPodcast = result[0] as DatabasePodcast;
 
       // Log admin activity

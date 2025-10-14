@@ -97,7 +97,7 @@ class AdminService {
         category: podcastData.category,
         image_url: imageUploadResult?.secure_url || podcastData.imageUrl,
         audio_url: audioUploadResult.secure_url,
-        duration_ms: audioUploadResult.duration ? audioUploadResult.duration * 1000 : null, // Convert to ms
+        duration_ms: audioUploadResult.duration ? audioUploadResult.duration * 1000 : undefined, // Convert to ms
         created_by: adminUser.id,
         sources: podcastData.sources || [],
       };
