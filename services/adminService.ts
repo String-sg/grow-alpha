@@ -4,6 +4,7 @@ import { mockCloudinaryService as cloudinaryService, type CloudinaryUploadResult
 import { podcastService, type CreatePodcastData } from './podcastService';
 import { quizService } from './quizService';
 import { userService } from './userService';
+import { sql } from '@/config/database';
 
 export interface AdminPodcastCreationData {
   title: string;
@@ -169,6 +170,15 @@ class AdminService {
   async deletePodcast(podcastId: string, adminEmail: string): Promise<{ success: boolean; error?: string }> {
     try {
       console.log('🗑️ Admin delete podcast request:', { podcastId, adminEmail });
+
+      // Check if database is configured
+      if (!sql) {
+        console.error('🗑️ Database not configured');
+        return {
+          success: false,
+          error: 'Database not configured'
+        };
+      }
 
       // Validate admin permissions
       console.log('🗑️ Validating admin user...');
