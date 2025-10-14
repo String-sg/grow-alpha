@@ -1,16 +1,31 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'expo-router';
-import { ArrowLeft, Upload } from 'lucide-react-native';
+import { ArrowLeft, Upload, Plus, Minus } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Alert, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+interface PodcastSource {
+  title: string;
+  url: string;
+  type: 'research' | 'article' | 'study' | 'website' | 'book' | 'video' | 'intranet' | 'other';
+  author: string;
+  publishedDate: string;
+}
+
 export default function AddContentScreen() {
   const router = useRouter();
   const { isAdmin, user } = useAuth();
-  const [contentType, setContentType] = useState<'podcast' | 'quiz' | 'educational'>('podcast');
+
+  // Podcast form fields based on actual Podcast interface
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [author, setAuthor] = useState('');
+  const [category, setCategory] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
+  const [sources, setSources] = useState<PodcastSource[]>([
+    { title: '', url: '', type: 'article', author: '', publishedDate: '' }
+  ]);
 
   // Redirect non-admin users
   React.useEffect(() => {
@@ -28,13 +43,38 @@ export default function AddContentScreen() {
     }
   }, [isAdmin, router]);
 
+  const addSource = () => {
+    setSources([...sources, { title: '', url: '', type: 'article', author: '', publishedDate: '' }]);
+  };
+
+  const removeSource = (index: number) => {
+    if (sources.length > 1) {
+      setSources(sources.filter((_, i) => i !== index));
+    }
+  };
+
+  const updateSource = (index: number, field: keyof PodcastSource, value: string) => {
+    const updatedSources = sources.map((source, i) =>
+      i === index ? { ...source, [field]: value } : source
+    );
+    setSources(updatedSources);
+  };
+
   const handleSubmit = () => {
+    const podcastData = {
+      title,
+      description,
+      author,
+      category,
+      imageUrl,
+      sources: sources.filter(source => source.title || source.url), // Only include non-empty sources
+      // Note: audioUrl and duration would be handled by file upload
+    };
+
     Alert.alert(
       'Feature Coming Soon',
-      'Content management functionality will be available in the next update. Your form data:\n\nType: ' +
-      contentType.charAt(0).toUpperCase() + contentType.slice(1) +
-      '\nTitle: ' + title +
-      '\nDescription: ' + description,
+      'Podcast creation functionality will be available in the next update.\n\nPodcast Data:\n' +
+      `Title: ${title}\nAuthor: ${author}\nCategory: ${category}\nSources: ${podcastData.sources.length} items`,
       [{ text: 'OK' }]
     );
   };
