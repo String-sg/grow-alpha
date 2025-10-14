@@ -1,6 +1,6 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'expo-router';
-import { ArrowLeft, Upload, Plus, Minus } from 'lucide-react-native';
+import { ArrowLeft, Minus, Plus, Upload } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Alert, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -169,19 +169,6 @@ export default function AddContentScreen() {
               placeholder="e.g., Artificial Intelligence, Student Well-being, Special Educational Needs"
               className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 bg-white"
               placeholderTextColor="#9CA3AF"
-            />
-          </View>
-
-          {/* Image URL Field */}
-          <View className="mb-6">
-            <Text className="text-gray-700 text-base font-medium mb-2">Cover Image URL</Text>
-            <TextInput
-              value={imageUrl}
-              onChangeText={setImageUrl}
-              placeholder="https://picsum.photos/400/400?random=1"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 bg-white"
-              placeholderTextColor="#9CA3AF"
-              autoCapitalize="none"
             />
           </View>
 
