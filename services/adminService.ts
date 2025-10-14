@@ -41,7 +41,7 @@ class AdminService {
     try {
       // Step 1: Validate admin permissions
       console.log('🔐 Validating admin permissions...');
-      const adminUser = await userService.getUserByGoogleId(adminEmail);
+      const adminUser = await userService.getUserByEmail(adminEmail);
 
       if (!adminUser) {
         return {
@@ -151,7 +151,7 @@ class AdminService {
       console.log('🗑️ Deleting podcast:', podcastId);
 
       // Validate admin permissions
-      const adminUser = await userService.getUserByGoogleId(adminEmail);
+      const adminUser = await userService.getUserByEmail(adminEmail);
       if (!adminUser) {
         return { success: false, error: 'Admin user not found' };
       }
