@@ -95,7 +95,12 @@ export default function HomeScreen() {
   };
 
   const handleDeleteContent = async (content: EducationalContent) => {
+    console.log('🗑️ handleDeleteContent called for:', content.title);
+    console.log('🗑️ isAdmin:', isAdmin, 'user email:', user?.email);
+    console.log('🗑️ content.isFromDatabase:', content.isFromDatabase);
+
     if (!isAdmin || !user?.email) {
+      console.log('🗑️ Permission denied');
       Alert.alert('Error', 'You do not have permission to delete content.');
       return;
     }

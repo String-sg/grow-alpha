@@ -97,6 +97,7 @@ export default function PodcastDetailsScreen() {
   const { id, from, topicId } = useLocalSearchParams<{ id: string; from?: string; topicId?: string }>();
   const { user } = useAuth(); // Get authenticated user info
   const [content, setContent] = useState<EducationalContent | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [dbQuiz, setDbQuiz] = useState<any>(null);
   const [notes, setNotes] = useState<Note[]>([]);
   const [showNoteEditor, setShowNoteEditor] = useState(false);
