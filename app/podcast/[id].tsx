@@ -196,6 +196,7 @@ export default function PodcastDetailsScreen() {
   useEffect(() => {
     const loadContent = async () => {
       if (id) {
+        setIsLoading(true);
         try {
           // Try to get content from hybrid service (database + static)
           const foundContent = await contentService.getContentById(id, educationalContent);
@@ -217,6 +218,8 @@ export default function PodcastDetailsScreen() {
           const staticContent = educationalContent.find(c => c.id === id);
           setContent(staticContent || null);
           setDbQuiz(null);
+        } finally {
+          setIsLoading(false);
         }
       }
     };
