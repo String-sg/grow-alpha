@@ -3,6 +3,7 @@
 // Test script to verify database connection and user service
 // Run with: node scripts/test-database.js
 
+require('dotenv').config();
 const { neon } = require('@neondatabase/serverless');
 
 // Get and process DATABASE_URL from environment

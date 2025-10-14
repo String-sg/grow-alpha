@@ -3,6 +3,7 @@
 // Database migration script for admin podcast management
 // Run with: npm run migrate:admin
 
+require('dotenv').config();
 const { neon } = require('@neondatabase/serverless');
 
 // Get and process DATABASE_URL from environment
@@ -59,7 +60,7 @@ async function runMigration() {
         image_url TEXT,
         audio_url TEXT,
         duration_ms INTEGER,
-        created_by UUID REFERENCES users(id) ON DELETE SET NULL,
+        created_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         status VARCHAR(50) DEFAULT 'active'
@@ -88,7 +89,7 @@ async function runMigration() {
     await sql`
       CREATE TABLE IF NOT EXISTS admin_logs (
         id SERIAL PRIMARY KEY,
-        admin_id UUID REFERENCES users(id) ON DELETE SET NULL,
+        admin_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
         action VARCHAR(100) NOT NULL,
         resource_type VARCHAR(50) NOT NULL,
         resource_id VARCHAR(255),
