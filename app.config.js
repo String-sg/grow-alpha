@@ -41,6 +41,9 @@ export default {
       expoUsername: process.env.EXPO_USERNAME,
       nodeEnv: process.env.NODE_ENV,
       databaseUrl: process.env.DATABASE_URL,
+      cloudinaryCloudName: process.env.CLOUDINARY_CLOUD_NAME,
+      cloudinaryApiKey: process.env.CLOUDINARY_API_KEY,
+      cloudinaryApiSecret: process.env.CLOUDINARY_API_SECRET,
     },
   },
 }; 

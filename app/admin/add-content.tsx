@@ -1,8 +1,11 @@
+import { PodcastCreationSuccessModal } from '@/components/PodcastCreationSuccessModal';
 import { useAuth } from '@/contexts/AuthContext';
+import { adminService } from '@/services/adminService';
+import * as DocumentPicker from 'expo-document-picker';
 import { useRouter } from 'expo-router';
-import { ArrowLeft, Upload, Plus, Minus } from 'lucide-react-native';
+import { ArrowLeft, CheckCircle, Minus, Plus, Upload } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { Alert, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 interface PodcastSource {
@@ -26,6 +29,22 @@ export default function AddContentScreen() {
   const [sources, setSources] = useState<PodcastSource[]>([
     { title: '', url: '', type: 'article', author: '', publishedDate: '' }
   ]);
+  const [quizJson, setQuizJson] = useState('');
+
+  // File handling
+  const [selectedAudioFile, setSelectedAudioFile] = useState<DocumentPicker.DocumentPickerResult | null>(null);
+  const [selectedImageFile, setSelectedImageFile] = useState<DocumentPicker.DocumentPickerResult | null>(null);
+
+  // Form state
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitProgress, setSubmitProgress] = useState<{
+    step: 'validation' | 'audio_upload' | 'image_upload' | 'database_creation' | 'complete';
+    message: string;
+  } | null>(null);
+
+  // Success modal state
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [createdPodcastTitle, setCreatedPodcastTitle] = useState('');
 
   // Redirect non-admin users
   React.useEffect(() => {
@@ -60,31 +79,197 @@ export default function AddContentScreen() {
     setSources(updatedSources);
   };
 
-  const handleSubmit = () => {
-    const podcastData = {
-      title,
-      description,
-      author,
-      category,
-      imageUrl,
-      sources: sources.filter(source => source.title || source.url), // Only include non-empty sources
-      // Note: audioUrl and duration would be handled by file upload
-    };
+  const handleAudioFilePicker = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: ['audio/*'],
+        copyToCacheDirectory: true,
+      });
 
-    Alert.alert(
-      'Feature Coming Soon',
-      'Podcast creation functionality will be available in the next update.\n\nPodcast Data:\n' +
-      `Title: ${title}\nAuthor: ${author}\nCategory: ${category}\nSources: ${podcastData.sources.length} items`,
-      [{ text: 'OK' }]
-    );
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        setSelectedAudioFile(result);
+        console.log('Audio file selected:', result.assets[0].name);
+      }
+    } catch (error) {
+      console.error('Error picking audio file:', error);
+      Alert.alert('Error', 'Failed to select audio file. Please try again.');
+    }
   };
 
-  const handleFileUpload = () => {
-    Alert.alert(
-      'Feature Coming Soon',
-      'File upload functionality will be available in the next update.',
-      [{ text: 'OK' }]
-    );
+  const handleImageFilePicker = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: ['image/*'],
+        copyToCacheDirectory: true,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        setSelectedImageFile(result);
+        console.log('Image file selected:', result.assets[0].name);
+      }
+    } catch (error) {
+      console.error('Error picking image file:', error);
+      Alert.alert('Error', 'Failed to select image file. Please try again.');
+    }
+  };
+
+  const handleCreateAnother = () => {
+    // Reset form
+    setTitle('');
+    setDescription('');
+    setAuthor('');
+    setCategory('');
+    setImageUrl('');
+    setQuizJson('');
+    setSources([{ title: '', url: '', type: 'article', author: '', publishedDate: '' }]);
+    setSelectedAudioFile(null);
+    setSelectedImageFile(null);
+    setSubmitProgress(null);
+    setIsSubmitting(false);
+  };
+
+  const handleCloseSuccessModal = () => {
+    setShowSuccessModal(false);
+    setCreatedPodcastTitle('');
+    setSubmitProgress(null);
+    setIsSubmitting(false);
+  };
+
+  const validateQuizJson = (jsonString: string): { isValid: boolean; error?: string; parsed?: any } => {
+    if (!jsonString.trim()) {
+      return { isValid: true }; // Quiz is optional
+    }
+
+    try {
+      const parsed = JSON.parse(jsonString);
+
+      if (!Array.isArray(parsed)) {
+        return { isValid: false, error: 'Quiz must be an array of questions' };
+      }
+
+      for (let i = 0; i < parsed.length; i++) {
+        const question = parsed[i];
+        if (!question.question || typeof question.question !== 'string') {
+          return { isValid: false, error: `Question ${i + 1}: Missing or invalid 'question' field` };
+        }
+        if (!Array.isArray(question.options) || question.options.length < 2) {
+          return { isValid: false, error: `Question ${i + 1}: 'options' must be an array with at least 2 items` };
+        }
+        if (typeof question.answer !== 'number' || question.answer < 0 || question.answer >= question.options.length) {
+          return { isValid: false, error: `Question ${i + 1}: 'answer' must be a valid index` };
+        }
+        if (!question.explanation || typeof question.explanation !== 'string') {
+          return { isValid: false, error: `Question ${i + 1}: Missing or invalid 'explanation' field` };
+        }
+        if (typeof question.order !== 'number') {
+          return { isValid: false, error: `Question ${i + 1}: Missing or invalid 'order' field` };
+        }
+      }
+
+      return { isValid: true, parsed };
+    } catch (error) {
+      return { isValid: false, error: 'Invalid JSON format' };
+    }
+  };
+
+  const validateForm = (): { isValid: boolean; error?: string } => {
+    if (!title.trim()) return { isValid: false, error: 'Title is required' };
+    if (!description.trim()) return { isValid: false, error: 'Description is required' };
+    if (!author.trim()) return { isValid: false, error: 'Author is required' };
+    if (!selectedAudioFile) return { isValid: false, error: 'Audio file is required' };
+
+    // Validate quiz JSON if provided
+    const quizValidation = validateQuizJson(quizJson);
+    if (!quizValidation.isValid) {
+      return { isValid: false, error: `Quiz validation error: ${quizValidation.error}` };
+    }
+
+    return { isValid: true };
+  };
+
+  const handleSubmit = async () => {
+    // Validate form
+    const validation = validateForm();
+    if (!validation.isValid) {
+      Alert.alert('Validation Error', validation.error);
+      return;
+    }
+
+    if (!selectedAudioFile?.assets?.[0]) {
+      Alert.alert('Error', 'Please select an audio file');
+      return;
+    }
+
+    if (!user?.email) {
+      Alert.alert('Error', 'User email not found');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmitProgress({ step: 'validation', message: 'Validating form data...' });
+
+    try {
+      // Parse quiz JSON if provided
+      const quizValidation = validateQuizJson(quizJson);
+      let quizQuestions = undefined;
+      if (quizValidation.isValid && quizValidation.parsed) {
+        quizQuestions = quizValidation.parsed;
+      }
+
+      const adminPodcastData = {
+        title: title.trim(),
+        description: description.trim(),
+        author: author.trim(),
+        category: category.trim() || undefined,
+        imageUrl: selectedImageFile?.assets?.[0]?.uri || imageUrl || undefined,
+        audioFileUri: selectedAudioFile.assets[0].uri,
+        sources: sources
+          .filter(source => source.title.trim() || source.url.trim())
+          .map(source => ({
+            title: source.title.trim(),
+            url: source.url.trim(),
+            type: source.type,
+            author: source.author.trim() || undefined,
+            published_date: source.publishedDate.trim() || undefined,
+          })),
+        quiz: quizQuestions,
+      };
+
+      setSubmitProgress({ step: 'audio_upload', message: 'Uploading audio file...' });
+
+      console.log('📝 Creating podcast with data:', {
+        ...adminPodcastData,
+        audioFileUri: '[FILE_URI]', // Don't log the full URI
+      });
+
+      const result = await adminService.createPodcast(adminPodcastData, user.email);
+
+      if (result.success) {
+        setSubmitProgress({ step: 'complete', message: 'Podcast created successfully!' });
+
+        // Store the podcast title and show success modal
+        setCreatedPodcastTitle(title.trim());
+        setShowSuccessModal(true);
+      } else {
+        console.error('❌ Podcast creation failed:', result);
+
+        Alert.alert(
+          'Creation Failed',
+          result.error || 'An unknown error occurred during podcast creation.',
+          [{ text: 'OK' }]
+        );
+      }
+    } catch (error) {
+      console.error('❌ Unexpected error during podcast creation:', error);
+
+      Alert.alert(
+        'Unexpected Error',
+        'An unexpected error occurred. Please check your internet connection and try again.',
+        [{ text: 'OK' }]
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Don't render if not admin
@@ -106,7 +291,7 @@ export default function AddContentScreen() {
           </TouchableOpacity>
 
           <Text style={{ fontFamily: 'GeistMono_600SemiBold' }} className="text-xl text-gray-900">
-            Add Content
+            Add more glow
           </Text>
 
           <View className="w-10" />
@@ -172,31 +357,65 @@ export default function AddContentScreen() {
             />
           </View>
 
-          {/* Image URL Field */}
-          <View className="mb-6">
-            <Text className="text-gray-700 text-base font-medium mb-2">Cover Image URL</Text>
-            <TextInput
-              value={imageUrl}
-              onChangeText={setImageUrl}
-              placeholder="https://picsum.photos/400/400?random=1"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 bg-white"
-              placeholderTextColor="#9CA3AF"
-              autoCapitalize="none"
-            />
-          </View>
-
           {/* Audio File Upload */}
           <View className="mb-6">
             <Text className="text-gray-700 text-base font-medium mb-2">Audio File *</Text>
             <TouchableOpacity
-              onPress={handleFileUpload}
-              className="w-full py-4 border-2 border-dashed border-gray-300 rounded-lg items-center justify-center bg-gray-50"
+              onPress={handleAudioFilePicker}
+              disabled={isSubmitting}
+              className={`w-full py-4 border-2 border-dashed rounded-lg items-center justify-center ${
+                selectedAudioFile
+                  ? 'border-green-300 bg-green-50'
+                  : 'border-gray-300 bg-gray-50'
+              } ${isSubmitting ? 'opacity-50' : ''}`}
               activeOpacity={0.8}
             >
-              <Upload size={24} color="#9CA3AF" />
-              <Text className="text-gray-500 mt-2">Tap to upload audio file</Text>
-              <Text className="text-gray-400 text-sm mt-1">MP3, WAV, or M4A</Text>
+              {selectedAudioFile ? (
+                <>
+                  <CheckCircle size={24} color="#16A34A" />
+                  <Text className="text-green-700 mt-2 font-medium">
+                    {selectedAudioFile.assets?.[0]?.name || 'Audio file selected'}
+                  </Text>
+                  <Text className="text-green-600 text-sm mt-1">
+                    {selectedAudioFile.assets?.[0]?.size
+                      ? `${Math.round((selectedAudioFile.assets[0].size / 1024 / 1024) * 100) / 100} MB`
+                      : 'Ready to upload'}
+                  </Text>
+                </>
+              ) : (
+                <>
+                  <Upload size={24} color="#9CA3AF" />
+                  <Text className="text-gray-500 mt-2">Tap to select audio file</Text>
+                  <Text className="text-gray-400 text-sm mt-1">MP3, WAV, or M4A</Text>
+                </>
+              )}
             </TouchableOpacity>
+          </View>
+
+          {/* Quiz JSON Field */}
+          <View className="mb-6">
+            <Text className="text-gray-700 text-base font-medium mb-2">Quiz Questions (JSON)</Text>
+            <Text className="text-gray-500 text-sm mb-3">
+              Optional: Add quiz questions as JSON array. Each question should have: question, options, answer (index), explanation, and order.
+            </Text>
+            <TextInput
+              value={quizJson}
+              onChangeText={setQuizJson}
+              placeholder={`[
+  {
+    "question": "What is the main topic?",
+    "options": ["Option A", "Option B", "Option C"],
+    "answer": 0,
+    "explanation": "This is correct because...",
+    "order": 1
+  }
+]`}
+              multiline
+              numberOfLines={8}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 bg-white font-mono text-sm"
+              placeholderTextColor="#9CA3AF"
+              textAlignVertical="top"
+            />
           </View>
 
           {/* Sources Section */}
@@ -287,28 +506,52 @@ export default function AddContentScreen() {
             ))}
           </View>
 
+          {/* Progress Indicator */}
+          {submitProgress && (
+            <View className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <View className="flex-row items-center mb-2">
+                <ActivityIndicator size="small" color="#2563EB" />
+                <Text className="text-blue-800 font-medium ml-2">
+                  {submitProgress.step === 'validation' && 'Validating...'}
+                  {submitProgress.step === 'audio_upload' && 'Uploading Audio...'}
+                  {submitProgress.step === 'image_upload' && 'Uploading Image...'}
+                  {submitProgress.step === 'database_creation' && 'Saving to Database...'}
+                  {submitProgress.step === 'complete' && 'Complete!'}
+                </Text>
+              </View>
+              <Text className="text-blue-700 text-sm">{submitProgress.message}</Text>
+            </View>
+          )}
+
           {/* Submit Button */}
           <TouchableOpacity
             onPress={handleSubmit}
-            className="w-full bg-blue-600 py-4 rounded-lg items-center justify-center mt-4"
+            disabled={isSubmitting}
+            className={`w-full py-4 rounded-lg items-center justify-center mt-4 flex-row ${
+              isSubmitting ? 'bg-gray-400' : 'bg-blue-600'
+            }`}
             activeOpacity={0.8}
           >
-            <Text className="text-white font-semibold text-lg">Create Podcast</Text>
+            {isSubmitting ? (
+              <>
+                <ActivityIndicator size="small" color="white" />
+                <Text className="text-white font-semibold text-lg ml-2">Creating...</Text>
+              </>
+            ) : (
+              <Text className="text-white font-semibold text-lg">Create Podcast</Text>
+            )}
           </TouchableOpacity>
 
-          {/* Coming Soon Notice */}
-          <View className="mt-6 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-            <Text className="text-yellow-800 font-medium mb-1">🚧 Development in Progress</Text>
-            <Text className="text-yellow-700 text-sm">
-              This podcast creation form matches your existing data structure. Features coming soon:
-              {'\n'}• Audio file upload and processing
-              {'\n'}• Automatic duration detection
-              {'\n'}• Database storage integration
-              {'\n'}• ID generation and validation
-            </Text>
-          </View>
         </View>
       </ScrollView>
+
+      {/* Success Modal */}
+      <PodcastCreationSuccessModal
+        visible={showSuccessModal}
+        onClose={handleCloseSuccessModal}
+        podcastTitle={createdPodcastTitle}
+        onCreateAnother={handleCreateAnother}
+      />
     </SafeAreaView>
   );
 }

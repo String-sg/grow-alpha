@@ -13,7 +13,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:config": "node scripts/test-config.js",
-    "test:database": "node scripts/test-database.js"
+    "test:database": "node scripts/test-database.js",
+    "migrate:admin": "node scripts/migrate-database.js"
   },
   "dependencies": {
     "@expo-google-fonts/geist": "^0.4.0",
@@ -27,6 +28,7 @@
     "@react-navigation/elements": "^2.3.8",
     "@react-navigation/native": "^7.1.6",
     "@uiball/loaders": "^1.3.1",
+    "dotenv": "^17.2.3",
     "easy-mesh-gradient": "^0.0.5",
     "expo": "~53.0.12",
     "expo-auth-session": "^6.2.1",
@@ -35,6 +37,7 @@
     "expo-clipboard": "^7.1.5",
     "expo-constants": "~17.1.6",
     "expo-crypto": "^14.1.5",
+    "expo-document-picker": "^14.0.7",
     "expo-font": "~13.3.1",
     "expo-haptics": "~14.1.4",
     "expo-image": "~2.3.0",

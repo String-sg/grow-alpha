@@ -1,3 +1,4 @@
+import { DeleteConfirmationModal } from '@/components/DeleteConfirmationModal';
 import { EducationalCard } from '@/components/EducationalCard';
 import { ProfileHeader } from '@/components/ProfileHeader';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
@@ -7,22 +8,49 @@ import { WeekCalendar } from '@/components/WeekCalendar';
 import { useAuth } from '@/contexts/AuthContext';
 import { EducationalContent, educationalContent, weeklyProgress } from '@/data/educational-content';
 import { useAudio } from '@/hooks/useAudio';
+import { contentService } from '@/services/contentService';
+import { adminService } from '@/services/adminService';
 import { getFeedbackFormUrl } from '@/utils/feedback';
 import { useRouter } from 'expo-router';
 import React, { useState, useEffect } from 'react';
-import { Linking, Platform, SafeAreaView, StatusBar, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Linking, Platform, SafeAreaView, StatusBar, Text, TouchableOpacity, View } from 'react-native';
 
 export default function HomeScreen() {
   const router = useRouter();
   const { currentPodcast, playContent } = useAudio();
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const [recentlyPlayed, setRecentlyPlayed] = useState<{ id: string; title: string; timestamp: number; imageUrl: string; category: string; author: string }[]>([]);
-  
+  const [allContent, setAllContent] = useState<EducationalContent[]>(educationalContent);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [contentToDelete, setContentToDelete] = useState<EducationalContent | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // Load hybrid content (database + static) on mount
+  useEffect(() => {
+    const loadContent = async () => {
+      try {
+        const hybridContent = await contentService.getAllContent(educationalContent);
+        setAllContent(hybridContent);
+      } catch (error) {
+        console.error('Failed to load hybrid content:', error);
+        // Keep static content as fallback
+      }
+    };
+
+    loadContent();
+  }, []);
+
   const handleContentPress = (content: EducationalContent) => {
     router.push(`/podcast/${content.id}`);
   };
 
   const handlePlayPress = async (content: EducationalContent) => {
+    // Validate audio URL for database content
+    if (content.isFromDatabase && (!content.audioUrl || content.audioUrl === '')) {
+      Alert.alert('Error', 'This podcast does not have a valid audio file.');
+      return;
+    }
+
     // Convert EducationalContent to Podcast format for audio system
     const podcastFormat = {
       id: content.id,
@@ -55,7 +83,77 @@ export default function HomeScreen() {
     });
     
     // Use the existing audio system
-    await playContent(podcastFormat);
+    try {
+      await playContent(podcastFormat);
+    } catch (error) {
+      console.error('Failed to play content:', error);
+      Alert.alert('Playback Error', 'Failed to start audio playback. Please try again.');
+    }
+  };
+
+  const handleDeleteContent = (content: EducationalContent) => {
+    if (!isAdmin || !user?.email) {
+      Alert.alert('Error', 'You do not have permission to delete content.');
+      return;
+    }
+
+    // Only allow deletion of database content (content with isFromDatabase flag)
+    if (!content.isFromDatabase) {
+      Alert.alert('Error', 'Only database content can be deleted.');
+      return;
+    }
+
+    // Show custom delete confirmation modal
+    setContentToDelete(content);
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!contentToDelete || !user?.email) return;
+
+    setIsDeleting(true);
+    try {
+      const result = await adminService.deletePodcast(contentToDelete.id, user.email);
+
+      if (result.success) {
+        // Remove from local state
+        setAllContent(prev => prev.filter(c => c.id !== contentToDelete.id));
+        setRecentlyPlayed(prev => prev.filter(r => r.id !== contentToDelete.id));
+
+        // Close modal and show success
+        setShowDeleteModal(false);
+        setContentToDelete(null);
+
+        // Show success message
+        if (Platform.OS === 'web') {
+          alert('Success: Podcast deleted successfully.');
+        } else {
+          Alert.alert('Success', 'Podcast deleted successfully.');
+        }
+      } else {
+        const errorMessage = 'Error: ' + (result.error || 'Failed to delete podcast.');
+        if (Platform.OS === 'web') {
+          alert(errorMessage);
+        } else {
+          Alert.alert('Error', result.error || 'Failed to delete podcast.');
+        }
+      }
+    } catch (error) {
+      console.error('Delete error:', error);
+      const errorMessage = 'Error: An unexpected error occurred while deleting the podcast.';
+      if (Platform.OS === 'web') {
+        alert(errorMessage);
+      } else {
+        Alert.alert('Error', 'An unexpected error occurred while deleting the podcast.');
+      }
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteModal(false);
+    setContentToDelete(null);
   };
 
 
@@ -64,12 +162,6 @@ export default function HomeScreen() {
 
   // Calculate bottom padding based on mini player visibility
   const bottomPadding = currentPodcast ? 120 : 40;
-
-
-
-  const allContent = educationalContent.filter(content => 
-    !(content.progress && content.progress > 0 && content.progress < 1) && content.id !== '6'
-  );
 
   const content = (
     <ProtectedRoute>
@@ -103,15 +195,17 @@ export default function HomeScreen() {
             <View className="px-6">
               {recentlyPlayed.slice(0, 3).map((item) => {
                 // Find the full content data to pass to EducationalCard
-                const content = educationalContent.find(c => c.id === item.id);
+                const content = allContent.find(c => c.id === item.id);
                 if (!content) return null;
-                
+
                 return (
                   <EducationalCard
                     key={item.id}
                     content={content}
                     onPress={() => handleContentPress(content)}
                     onPlayPress={() => handlePlayPress(content)}
+                    onDelete={() => handleDeleteContent(content)}
+                    isFromDatabase={content.isFromDatabase}
                   />
                 );
               })}
@@ -129,11 +223,11 @@ export default function HomeScreen() {
           
           <View className="px-6">
             {(() => {
-              const filteredContent = educationalContent.filter(content => 
+              const recommendedContent = allContent.filter(content =>
                 !recentlyPlayed.some(recent => recent.id === content.id)
               );
               
-              if (filteredContent.length === 0) {
+              if (recommendedContent.length === 0) {
                 return (
                   <View className="text-center py-8">
                     <Text className="text-slate-600 text-base text-center">
@@ -142,15 +236,17 @@ export default function HomeScreen() {
                   </View>
                 );
               }
-              
+
               return (
                 <>
-                  {filteredContent.map((content) => (
+                  {recommendedContent.map((content) => (
                     <EducationalCard
                       key={content.id}
                       content={content}
                       onPress={() => handleContentPress(content)}
                       onPlayPress={() => handlePlayPress(content)}
+                      onDelete={() => handleDeleteContent(content)}
+                      isFromDatabase={content.isFromDatabase}
                     />
                   ))}
                   
@@ -183,12 +279,30 @@ export default function HomeScreen() {
   );
 
   if (Platform.OS === 'web') {
-    return content;
+    return (
+      <>
+        {content}
+        <DeleteConfirmationModal
+          visible={showDeleteModal}
+          onClose={handleCancelDelete}
+          podcastTitle={contentToDelete?.title || ''}
+          onConfirm={handleConfirmDelete}
+          isDeleting={isDeleting}
+        />
+      </>
+    );
   }
 
   return (
     <SafeAreaView className="flex-1">
       {content}
+      <DeleteConfirmationModal
+        visible={showDeleteModal}
+        onClose={handleCancelDelete}
+        podcastTitle={contentToDelete?.title || ''}
+        onConfirm={handleConfirmDelete}
+        isDeleting={isDeleting}
+      />
     </SafeAreaView>
   );
 }

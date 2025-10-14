@@ -6,6 +6,7 @@ import { useAudioContext } from '@/contexts/AudioContext';
 import { useMLU } from '@/contexts/MLUContext';
 import { mockQuizzes } from '@/data/quizzes';
 import { mockPodcasts } from '@/data/podcasts';
+import { quizService } from '@/services/quizService';
 import {
   Quiz,
   QuizAnswer,
@@ -31,7 +32,7 @@ const QUIZ_STORAGE_KEY = 'quiz_attempts';
 const QUIZ_PROGRESS_KEY = 'quiz_progress';
 
 export default function QuizScreen() {
-  const { id, podcastId } = useLocalSearchParams<{ id: string; podcastId?: string }>();
+  const { id, podcastId, type } = useLocalSearchParams<{ id: string; podcastId?: string; type?: string }>();
   const { currentPodcast } = useAudioContext();
   const { incrementCompletedMLUs } = useMLU();
   const [quiz, setQuiz] = useState<Quiz | null>(null);
@@ -45,7 +46,42 @@ export default function QuizScreen() {
 
   const loadQuiz = useCallback(async () => {
     try {
-      const foundQuiz = mockQuizzes.find(q => q.id === id);
+      let foundQuiz: Quiz | null = null;
+
+      if (type === 'database') {
+        // Load quiz from database
+        try {
+          const dbQuiz = await quizService.getQuizByPodcastId(podcastId || '');
+          if (dbQuiz) {
+            // Convert database quiz to Quiz format
+            foundQuiz = {
+              id: dbQuiz.id,
+              podcastId: dbQuiz.podcast_id,
+              title: `Quiz for ${podcastId}`, // We'll need to get the podcast title
+              description: 'Database-generated quiz',
+              durationThreshold: 0.8, // 80% listening requirement
+              estimatedTime: 5, // 5 minutes estimated
+              questions: dbQuiz.questions.map((q: any, index: number) => ({
+                id: `${dbQuiz.id}-q${index + 1}`,
+                question: q.question,
+                options: q.options.map((option: string, optionIndex: number) => ({
+                  id: `${dbQuiz.id}-q${index + 1}-o${optionIndex}`,
+                  text: option,
+                  isCorrect: optionIndex === q.answer,
+                })),
+                explanation: q.explanation,
+                difficulty: 'medium' as const,
+              })),
+            };
+          }
+        } catch (error) {
+          console.error('Failed to load database quiz:', error);
+        }
+      } else {
+        // Load from mock quizzes
+        foundQuiz = mockQuizzes.find(q => q.id === id) || null;
+      }
+
       if (!foundQuiz) {
         Alert.alert('Error', 'Quiz not found', [
           { text: 'OK', onPress: () => router.back() }
@@ -70,7 +106,7 @@ export default function QuizScreen() {
         { text: 'OK', onPress: () => router.back() }
       ]);
     }
-  }, [id]);
+  }, [id, type, podcastId]);
 
   useEffect(() => {
     loadQuiz();

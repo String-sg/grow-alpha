@@ -48,7 +48,7 @@ You'll be able to:
     imageUrl: 'https://picsum.photos/400/400?random=10',
     audioUrl: require('../assets/audio/10 json image - isolated.mp3'),
     duration: 251000, // 4min 11s
-    author: 'Kahhow',
+    author: 'DXD Product Team',
     category: 'Artificial Intelligence',
     sources: [
       {
@@ -73,7 +73,7 @@ You'll be able to:
     imageUrl: 'https://picsum.photos/400/400?random=8',
     audioUrl: require('../assets/audio/8 Prompt Injection.mp3'),
     duration: 201000, 
-    author: 'Kahhow',
+    author: 'DXD Product Team',
     category: 'Artificial Intelligence',
     sources: [
       {
@@ -100,14 +100,14 @@ You'll be able to:
     imageUrl: 'https://picsum.photos/400/400?random=7',
     audioUrl: require('../assets/audio/15 ai audio - eugene - isolated.mp3'),
     duration: 306000,
-    author: 'Kahhow',
+    author: 'DXD Product Team',
     category: 'Artificial Intelligence',
     sources: [
       {
         title: 'Prompts for Suno to generate songs for your subject',
         url: 'https://medium.com/string/suno-ready-prompts-for-learning-via-audio-first-35e87af221e4',
         type: 'website',
-        author: 'Kahhow',
+        author: 'DXD Product Team',
         publishedDate: '2025',
       },
       {

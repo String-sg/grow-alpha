@@ -33,8 +33,8 @@ function AppContent() {
 
   // No automatic redirect - let individual screens handle navigation
 
-  // Hide mini player when fullscreen player is active, on quiz pages, or on chat page
-  const shouldShowMiniPlayer = pathname !== '/player' && !pathname.startsWith('/quiz') && pathname !== '/chat' && pathname !== '/login';
+  // Hide mini player when fullscreen player is active, on quiz pages, chat page, or admin screens
+  const shouldShowMiniPlayer = pathname !== '/player' && !pathname.startsWith('/quiz') && pathname !== '/chat' && pathname !== '/login' && !pathname.startsWith('/admin');
 
   return (
     <ThemeProvider value={DefaultTheme}>

@@ -18,6 +18,7 @@ export interface EducationalContent {
   isCompleted?: boolean;
   publishedDate: string;
   createdAt: Date; // Actual creation date
+  isFromDatabase?: boolean; // Flag to identify database content for admin controls
   sources?: PodcastSource[];
 }
 
@@ -78,7 +79,7 @@ You'll be able to:
 
 3 Implementing team workflows ensures visuals align with department or school branding, making materials easier for students to recognise and follow.`,
     category: 'Artificial Intelligence',
-    author: 'Kahhow',
+    author: 'DXD Product Team',
     duration: 251000, // 4min 11s
     imageUrl: 'https://picsum.photos/400/400?random=10',
     audioUrl: require('../assets/audio/10 json image - isolated.mp3'),
@@ -114,7 +115,7 @@ You'll be able to:
 
 3 Treat AI critically, know the common tricks ("ignore the above," translation hacks, role-play outlets), and use awareness as the best safeguard in schools.`,
     category: 'Artificial Intelligence',
-    author: 'Kahhow',
+    author: 'DXD Product Team',
     duration: 201000, // 3.35 minutes in milliseconds
     imageUrl: 'https://picsum.photos/400/400?random=8',
     audioUrl: require('../assets/audio/8 Prompt Injection.mp3'),
@@ -148,7 +149,7 @@ You'll be able to:
     description: 'Discover how you can use AI to turn subject content into songs, harness audio for memory, and explore sleep-based learning strategies inspired by Eugene Teo\'s (SJI) edutech experiments to support student learning outcomes.\n\nYou\'ll be able to:\n1. Use AI tools like ChatGPT, Suno, or Udio to convert subject concepts into lyrics and music, even if you\'re not musically inclined.\n2. Integrate audio-based study aids into your teaching — from playlists to paired video summaries — to reinforce learning beyond the classroom.\n3. Apply sleep research such as Targeted Memory Reactivation (TMR) by pairing summaries and lofi tracks with bedtime routines to strengthen student recall.',
     summary: '1. Turn Concepts into Lyrics – Use AI prompts to transform tricky topics (like ionic bonding) into short, catchy lines. You don\'t need to be musical — AI does the heavy lifting.\n2. Generate Songs with AI Tools – Drop your lyrics into Suno or Udio, pick a style (lofi, pop, rap), and in minutes you\'ll have a polished track for students to study with.\n3. Boost Recall with Audio & Sleep – Pair songs with NotebookLM video summaries, then encourage students to listen before bed. Research on Targeted Memory Reactivation (TMR) suggests audio cues during sleep can strengthen memory.',
     category: 'Artificial Intelligence',
-    author: 'Kahhow',
+    author: 'DXD Product Team',
     duration: 306000, // 5.1 minutes in milliseconds
     imageUrl: 'https://picsum.photos/400/400?random=7',
     audioUrl: require('../assets/audio/15 ai audio - eugene - isolated.mp3'),
@@ -336,7 +337,7 @@ Watch the original video for more!`,
 
 3. Build Empathy & Resilience – Implement learning activities that help students engage with diverse perspectives and develop emotional resilience for an AI-saturated world.`,
     category: 'Artificial Intelligence',
-    author: 'Kahhow',
+    author: 'DXD Product Team',
     duration: 324702, // 5min 25s
     imageUrl: 'https://picsum.photos/400/400?random=9',
     audioUrl: require('../assets/audio/9_AI_olympiad.mp3'),
