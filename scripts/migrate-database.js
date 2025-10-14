@@ -101,8 +101,21 @@ async function runMigration() {
     `;
     console.log('✅ Admin logs table created\n');
 
-    // Step 6: Create indexes for performance
-    console.log('6. Creating database indexes...');
+    // Step 6: Create quiz table
+    console.log('6. Creating quiz table...');
+    await sql`
+      CREATE TABLE IF NOT EXISTS quizzes (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        podcast_id UUID REFERENCES podcasts(id) ON DELETE CASCADE,
+        questions JSONB NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `;
+    console.log('✅ Quiz table created\n');
+
+    // Step 7: Create indexes for performance
+    console.log('7. Creating database indexes...');
     await sql`CREATE INDEX IF NOT EXISTS idx_podcasts_created_by ON podcasts(created_by);`;
     await sql`CREATE INDEX IF NOT EXISTS idx_podcasts_status ON podcasts(status);`;
     await sql`CREATE INDEX IF NOT EXISTS idx_podcast_sources_podcast_id ON podcast_sources(podcast_id);`;
