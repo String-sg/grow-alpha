@@ -50,15 +50,51 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Check network connectivity
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener(state => {
-      setIsOffline(!state.isConnected);
+      const wasOffline = isOffline;
+      const isNowOnline = state.isConnected;
+
+      setIsOffline(!isNowOnline);
+
+      // Sync when coming back online
+      if (wasOffline && isNowOnline && user && !isDemoMode) {
+        console.log('Network reconnected, syncing user data...');
+        syncUserWithDatabase();
+      }
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [isOffline, user, isDemoMode]);
 
   // Generate UUID for user
   const generateUUID = (): string => {
     return Crypto.randomUUID();
+  };
+
+  // Sync user data with database when online
+  const syncUserWithDatabase = async () => {
+    if (isOffline || isDemoMode || !user) return;
+
+    try {
+      console.log('Attempting to sync user with database...');
+      const dbUser = await userService.createOrUpdateUser({
+        google_id: user.id,
+        uuid: user.uuid,
+        email: user.email,
+        name: user.name,
+      });
+
+      if (dbUser) {
+        console.log('User synced with database successfully');
+
+        // Update local UUID if database has different one
+        if (dbUser.uuid !== user.uuid) {
+          await AsyncStorage.setItem(STORAGE_KEYS.USER_UUID, dbUser.uuid);
+          setUser({ ...user, uuid: dbUser.uuid });
+        }
+      }
+    } catch (error) {
+      console.error('Failed to sync user with database:', error);
+    }
   };
 
   // Validate email domain
@@ -127,7 +163,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Get user info from Google
+  // Get user info from Google and sync with database
   const getUserInfo = async (accessToken: string): Promise<User> => {
     const response = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
       headers: {
@@ -140,22 +176,52 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     const userInfo = await response.json();
-    
+
     // Validate email domain
     if (!validateEmailDomain(userInfo.email)) {
       throw new Error('INVALID_DOMAIN');
     }
 
-    // Generate or retrieve UUID
+    // Generate or retrieve UUID from AsyncStorage first
     const existingUUID = await AsyncStorage.getItem(STORAGE_KEYS.USER_UUID);
     const uuid = existingUUID || generateUUID();
 
-    return {
+    const userData = {
       id: userInfo.id,
       email: userInfo.email,
       name: userInfo.name,
       uuid,
     };
+
+    // Sync with database when online
+    try {
+      if (!isOffline) {
+        console.log('Syncing user with database...');
+        const dbUser = await userService.createOrUpdateUser({
+          google_id: userInfo.id,
+          uuid: uuid,
+          email: userInfo.email,
+          name: userInfo.name,
+        });
+
+        if (dbUser) {
+          console.log('User synced with database successfully:', dbUser.email);
+
+          // Update local storage with database UUID if different
+          if (dbUser.uuid !== uuid) {
+            await AsyncStorage.setItem(STORAGE_KEYS.USER_UUID, dbUser.uuid);
+            userData.uuid = dbUser.uuid;
+          }
+        }
+      } else {
+        console.log('Offline - user will sync with database when connection is restored');
+      }
+    } catch (error) {
+      console.error('Failed to sync user with database:', error);
+      // Continue with local data - don't block authentication
+    }
+
+    return userData;
   };
 
   // Enable demo mode
