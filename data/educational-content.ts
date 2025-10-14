@@ -18,6 +18,7 @@ export interface EducationalContent {
   isCompleted?: boolean;
   publishedDate: string;
   createdAt: Date; // Actual creation date
+  isFromDatabase?: boolean; // Flag to identify database content for admin controls
   sources?: PodcastSource[];
 }
 

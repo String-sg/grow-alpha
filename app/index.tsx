@@ -41,6 +41,17 @@ export default function HomeScreen() {
   };
 
   const handlePlayPress = async (content: EducationalContent) => {
+    console.log('🎵 Play button pressed for:', content.title);
+    console.log('🎵 Audio URL:', content.audioUrl);
+    console.log('🎵 Is from database:', content.isFromDatabase);
+    console.log('🎵 Audio URL type:', typeof content.audioUrl);
+
+    // Validate audio URL for database content
+    if (content.isFromDatabase && (!content.audioUrl || content.audioUrl === '')) {
+      Alert.alert('Error', 'This podcast does not have a valid audio file.');
+      return;
+    }
+
     // Convert EducationalContent to Podcast format for audio system
     const podcastFormat = {
       id: content.id,
