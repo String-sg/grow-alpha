@@ -98,6 +98,26 @@ class UserService {
     }
   }
 
+  async getUserByEmail(email: string): Promise<DatabaseUser | null> {
+    if (!sql) {
+      console.warn('Database not configured, skipping user lookup');
+      return null;
+    }
+
+    try {
+      await this.ensureInitialized();
+
+      const result = await sql`
+        SELECT * FROM users WHERE email = ${email} LIMIT 1;
+      `;
+
+      return result[0] as DatabaseUser || null;
+    } catch (error) {
+      console.error('Failed to get user by email:', error);
+      throw error;
+    }
+  }
+
   async updateUserLogin(googleId: string): Promise<void> {
     if (!sql) {
       console.warn('Database not configured, skipping login update');

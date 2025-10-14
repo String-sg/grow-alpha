@@ -19,7 +19,8 @@ const DEMO_USER = {
 // Admin user configuration
 const ADMIN_EMAILS = [
   'lee_kah_how@moe.edu.sg',
-  'tay_hui_zhen_jasmine@moe.edu.sg'
+  'tay_hui_zhen_jasmine@moe.edu.sg',
+  'jeong_wondo@moe.edu.sg'
 ];
 
 interface User {
