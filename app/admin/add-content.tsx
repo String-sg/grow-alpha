@@ -1,3 +1,4 @@
+import { PodcastCreationSuccessModal } from '@/components/PodcastCreationSuccessModal';
 import { useAuth } from '@/contexts/AuthContext';
 import { adminService } from '@/services/adminService';
 import * as DocumentPicker from 'expo-document-picker';
@@ -39,6 +40,10 @@ export default function AddContentScreen() {
     step: 'validation' | 'audio_upload' | 'image_upload' | 'database_creation' | 'complete';
     message: string;
   } | null>(null);
+
+  // Success modal state
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [createdPodcastTitle, setCreatedPodcastTitle] = useState('');
 
   // Redirect non-admin users
   React.useEffect(() => {
@@ -235,7 +240,7 @@ export default function AddContentScreen() {
           </TouchableOpacity>
 
           <Text style={{ fontFamily: 'GeistMono_600SemiBold' }} className="text-xl text-gray-900">
-            Add Content
+            Add more glow
           </Text>
 
           <View className="w-10" />
