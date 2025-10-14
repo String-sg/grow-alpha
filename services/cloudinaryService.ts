@@ -206,9 +206,6 @@ class CloudinaryService {
       const response = await fetch(uploadUrl, {
         method: 'POST',
         body: formData,
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
       });
 
       if (!response.ok) {
