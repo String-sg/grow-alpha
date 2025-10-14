@@ -46,6 +46,7 @@ function AppContent() {
           <Stack.Screen name="explore" options={{ headerShown: false }} />
           <Stack.Screen name="player" options={{ headerShown: false, presentation: 'modal' }} />
           <Stack.Screen name="chat" options={{ headerShown: false, presentation: 'modal' }} />
+          <Stack.Screen name="admin/add-content" options={{ headerShown: false }} />
           <Stack.Screen name="+not-found" />
         </Stack>
 
