@@ -5,15 +5,44 @@
 
 const { neon } = require('@neondatabase/serverless');
 
-// Get DATABASE_URL from environment
-const DATABASE_URL = process.env.DATABASE_URL;
+// Get and process DATABASE_URL from environment
+const rawDatabaseUrl = process.env.DATABASE_URL;
 
-if (!DATABASE_URL) {
+if (!rawDatabaseUrl) {
   console.error('❌ DATABASE_URL environment variable is not set');
   console.log('Please add DATABASE_URL to your .env file');
   process.exit(1);
 }
 
+// Extract PostgreSQL URL from psql command format
+const extractPostgresUrl = (connectionString) => {
+  if (!connectionString) return '';
+
+  // If it's already a postgresql:// URL, return as-is
+  if (connectionString.startsWith('postgresql://')) {
+    return connectionString;
+  }
+
+  // Extract from psql format: psql 'postgresql://...'
+  const match = connectionString.match(/psql\s+'([^']+)'/);
+  if (match && match[1]) {
+    return match[1];
+  }
+
+  // If no match, return original (might be valid URL)
+  return connectionString;
+};
+
+const DATABASE_URL = extractPostgresUrl(rawDatabaseUrl);
+
+if (!DATABASE_URL) {
+  console.error('❌ Could not extract valid DATABASE_URL');
+  console.log('Expected format: postgresql://username:password@host/database?sslmode=require');
+  console.log('Or psql format: psql \'postgresql://username:password@host/database?sslmode=require\'');
+  process.exit(1);
+}
+
+console.log('Using database URL:', DATABASE_URL.replace(/:[^:@]*@/, ':***@')); // Hide password
 const sql = neon(DATABASE_URL);
 
 async function testDatabase() {

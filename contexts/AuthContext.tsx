@@ -16,6 +16,12 @@ const DEMO_USER = {
   uuid: 'demo-uuid-12345'
 };
 
+// Admin user configuration
+const ADMIN_EMAILS = [
+  'lee_kah_how@moe.edu.sg',
+  'tay_hui_zhen_jasmine@moe.gov.sg'
+];
+
 interface User {
   id: string;
   email: string;
@@ -29,6 +35,7 @@ interface AuthContextType {
   isOffline: boolean;
   isDemoMode: boolean;
   hasValidEmail: boolean;
+  isAdmin: boolean;
   login: () => Promise<void>;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
