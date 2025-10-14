@@ -20,20 +20,16 @@ export default function HomeScreen() {
   const { user, isAdmin } = useAuth();
   const [recentlyPlayed, setRecentlyPlayed] = useState<{ id: string; title: string; timestamp: number; imageUrl: string; category: string; author: string }[]>([]);
   const [allContent, setAllContent] = useState<EducationalContent[]>(educationalContent);
-  const [isLoadingContent, setIsLoadingContent] = useState(false);
 
   // Load hybrid content (database + static) on mount
   useEffect(() => {
     const loadContent = async () => {
-      setIsLoadingContent(true);
       try {
         const hybridContent = await contentService.getAllContent(educationalContent);
         setAllContent(hybridContent);
       } catch (error) {
         console.error('Failed to load hybrid content:', error);
         // Keep static content as fallback
-      } finally {
-        setIsLoadingContent(false);
       }
     };
 
@@ -132,12 +128,6 @@ export default function HomeScreen() {
 
   // Calculate bottom padding based on mini player visibility
   const bottomPadding = currentPodcast ? 120 : 40;
-
-
-
-  const filteredContent = allContent.filter(content =>
-    !(content.progress && content.progress > 0 && content.progress < 1) && content.id !== '6'
-  );
 
   const content = (
     <ProtectedRoute>
