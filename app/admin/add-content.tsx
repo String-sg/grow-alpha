@@ -120,6 +120,7 @@ export default function AddContentScreen() {
     setAuthor('');
     setCategory('');
     setImageUrl('');
+    setQuizJson('');
     setSources([{ title: '', url: '', type: 'article', author: '', publishedDate: '' }]);
     setSelectedAudioFile(null);
     setSelectedImageFile(null);
@@ -339,6 +340,33 @@ export default function AddContentScreen() {
               )}
             </TouchableOpacity>
           </View>
+
+          {/* Quiz JSON Field */}
+          <View className="mb-6">
+            <Text className="text-gray-700 text-base font-medium mb-2">Quiz Questions (JSON)</Text>
+            <Text className="text-gray-500 text-sm mb-3">
+              Optional: Add quiz questions as JSON array. Each question should have: question, options, answer (index), explanation, and order.
+            </Text>
+            <TextInput
+              value={quizJson}
+              onChangeText={setQuizJson}
+              placeholder={`[
+  {
+    "question": "What is the main topic?",
+    "options": ["Option A", "Option B", "Option C"],
+    "answer": 0,
+    "explanation": "This is correct because...",
+    "order": 1
+  }
+]`}
+              multiline
+              numberOfLines={8}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 bg-white font-mono text-sm"
+              placeholderTextColor="#9CA3AF"
+              textAlignVertical="top"
+            />
+          </View>
+
           {/* Sources Section */}
           <View className="mb-6">
             <View className="flex-row items-center justify-between mb-3">
