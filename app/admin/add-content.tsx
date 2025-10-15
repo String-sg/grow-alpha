@@ -137,6 +137,66 @@ export default function AddContentScreen() {
     setIsSubmitting(false);
   };
 
+  const handleQuizJsonChange = (text: string) => {
+    setQuizJson(text);
+
+    // Real-time validation
+    if (!text.trim()) {
+      setQuizJsonError(null);
+      setQuizJsonValid(null);
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(text);
+      if (!Array.isArray(parsed)) {
+        setQuizJsonError('Quiz must be an array of questions');
+        setQuizJsonValid(false);
+        return;
+      }
+
+      // Basic validation
+      for (let i = 0; i < parsed.length; i++) {
+        const question = parsed[i];
+        if (!question.question || typeof question.question !== 'string') {
+          setQuizJsonError(`Question ${i + 1}: Missing 'question' field`);
+          setQuizJsonValid(false);
+          return;
+        }
+        if (!Array.isArray(question.options) || question.options.length < 2) {
+          setQuizJsonError(`Question ${i + 1}: Need at least 2 options`);
+          setQuizJsonValid(false);
+          return;
+        }
+        if (typeof question.answer !== 'number' || question.answer < 0 || question.answer >= question.options.length) {
+          setQuizJsonError(`Question ${i + 1}: Invalid answer index`);
+          setQuizJsonValid(false);
+          return;
+        }
+      }
+
+      setQuizJsonError(null);
+      setQuizJsonValid(true);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Invalid JSON';
+      setQuizJsonError(`JSON Error: ${errorMessage}`);
+      setQuizJsonValid(false);
+    }
+  };
+
+  const formatQuizJson = () => {
+    if (!quizJson.trim()) return;
+
+    try {
+      const parsed = JSON.parse(quizJson);
+      const formatted = JSON.stringify(parsed, null, 2);
+      setQuizJson(formatted);
+      handleQuizJsonChange(formatted);
+    } catch (error) {
+      Alert.alert('Invalid JSON', 'Cannot format invalid JSON. Please fix syntax errors first.');
+    }
+  };
+
   const validateQuizJson = (jsonString: string): { isValid: boolean; error?: string; parsed?: any } => {
     console.log('🧩 validateQuizJson called with:', jsonString.length, 'characters');
 
