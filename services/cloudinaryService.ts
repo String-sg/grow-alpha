@@ -80,9 +80,7 @@ class CloudinaryService {
       const response = await fetch(uploadUrl, {
         method: 'POST',
         body: formData,
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+        // Don't set Content-Type header - let browser set it automatically for FormData
       });
 
       if (!response.ok) {
@@ -206,6 +204,7 @@ class CloudinaryService {
       const response = await fetch(uploadUrl, {
         method: 'POST',
         body: formData,
+        // Don't set Content-Type header - let browser set it automatically for FormData
       });
 
       if (!response.ok) {

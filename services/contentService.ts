@@ -7,9 +7,57 @@ import { podcastService, type DatabasePodcast } from './podcastService';
  */
 class ContentService {
   /**
+   * Get category colors based on category name
+   */
+  private getCategoryColors(category: string): { badgeColor: string; textColor: string } {
+    const categoryMap: Record<string, { badgeColor: string; textColor: string }> = {
+      // Main categories matching static content
+      'Student Well-being': { badgeColor: 'bg-blue-200', textColor: 'text-blue-900' },
+      'Artificial Intelligence': { badgeColor: 'bg-yellow-200', textColor: 'text-yellow-900' },
+      'Special Educational Needs': { badgeColor: 'bg-purple-200', textColor: 'text-purple-900' },
+
+      // Additional category mappings
+      'Learn with BOB': { badgeColor: 'bg-purple-200', textColor: 'text-purple-900' },
+      'Professional Development': { badgeColor: 'bg-blue-200', textColor: 'text-blue-900' },
+      'Classroom Management': { badgeColor: 'bg-green-200', textColor: 'text-green-900' },
+      'Technology': { badgeColor: 'bg-yellow-200', textColor: 'text-yellow-900' },
+      'Communication': { badgeColor: 'bg-indigo-200', textColor: 'text-indigo-900' },
+      'Assessment': { badgeColor: 'bg-pink-200', textColor: 'text-pink-900' },
+
+      // Default fallback
+      'General': { badgeColor: 'bg-gray-200', textColor: 'text-gray-900' },
+    };
+
+    // Try exact match first
+    if (categoryMap[category]) {
+      return categoryMap[category];
+    }
+
+    // Try partial matches for flexible categorization
+    const lowerCategory = category.toLowerCase();
+    if (lowerCategory.includes('bob') || lowerCategory.includes('clarify')) {
+      return categoryMap['Learn with BOB'];
+    }
+    if (lowerCategory.includes('ai') || lowerCategory.includes('artificial')) {
+      return categoryMap['Artificial Intelligence'];
+    }
+    if (lowerCategory.includes('special') || lowerCategory.includes('sen') || lowerCategory.includes('adhd') || lowerCategory.includes('autism')) {
+      return categoryMap['Special Educational Needs'];
+    }
+    if (lowerCategory.includes('well') || lowerCategory.includes('mental') || lowerCategory.includes('emotion')) {
+      return categoryMap['Student Well-being'];
+    }
+
+    // Default to gray
+    return categoryMap['General'];
+  }
+
+  /**
    * Convert database podcast to EducationalContent format
    */
   private convertPodcastToEducationalContent(podcast: DatabasePodcast & { sources: any[] }): EducationalContent {
+    const categoryColors = this.getCategoryColors(podcast.category || 'General');
+
     return {
       id: podcast.id,
       title: podcast.title,
@@ -21,8 +69,8 @@ class ContentService {
       imageUrl: podcast.image_url || 'https://picsum.photos/400/400?random=' + podcast.id.slice(-2),
       audioUrl: podcast.audio_url || '',
       backgroundColor: 'bg-white',
-      badgeColor: 'bg-green-200',
-      textColor: 'text-green-900',
+      badgeColor: categoryColors.badgeColor,
+      textColor: categoryColors.textColor,
       timeLeft: this.formatDuration(podcast.duration_ms || 0),
       progress: 0,
       publishedDate: this.formatPublishDate(podcast.created_at),
