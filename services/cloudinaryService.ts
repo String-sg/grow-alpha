@@ -62,13 +62,8 @@ class CloudinaryService {
     fileUri: string,
     options: AudioUploadOptions = {}
   ): Promise<CloudinaryUploadResult> {
-    // Temporarily bypass configuration check for debugging
-    const configCheck = this.isConfigured();
-    console.log('⚠️ Configuration check result:', configCheck);
-
-    if (!configCheck) {
-      console.warn('⚠️ Cloudinary not configured, but proceeding anyway for debugging...');
-      // throw new Error('Cloudinary not configured. Please check environment variables.');
+    if (!this.isConfigured()) {
+      throw new Error('Cloudinary not configured. Please check environment variables.');
     }
 
     try {
