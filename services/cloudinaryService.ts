@@ -54,7 +54,11 @@ class CloudinaryService {
     }
 
     try {
-      console.log('Uploading audio to Cloudinary...', { fileUri });
+      console.log('Uploading audio to Cloudinary...', {
+        fileUri,
+        cloudName: CLOUDINARY_CONFIG.cloud_name,
+        uploadUrl: `https://api.cloudinary.com/v1_1/${CLOUDINARY_CONFIG.cloud_name}/upload`
+      });
 
       // Create FormData for upload
       const formData = new FormData();
