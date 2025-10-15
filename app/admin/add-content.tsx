@@ -479,13 +479,31 @@ export default function AddContentScreen() {
 
           {/* Quiz JSON Field */}
           <View className="mb-6">
-            <Text className="text-gray-700 text-base font-medium mb-2">Quiz Questions (JSON)</Text>
+            <View className="flex-row items-center justify-between mb-2">
+              <Text className="text-gray-700 text-base font-medium">Quiz Questions (JSON)</Text>
+              <TouchableOpacity
+                onPress={formatQuizJson}
+                disabled={!quizJson.trim()}
+                className={`px-3 py-1 rounded ${
+                  quizJson.trim() ? 'bg-blue-100' : 'bg-gray-100'
+                }`}
+                activeOpacity={0.7}
+              >
+                <Text className={`text-sm font-medium ${
+                  quizJson.trim() ? 'text-blue-600' : 'text-gray-400'
+                }`}>
+                  Format JSON
+                </Text>
+              </TouchableOpacity>
+            </View>
+
             <Text className="text-gray-500 text-sm mb-3">
               Optional: Add quiz questions as JSON array. Each question should have: question, options, answer (index), explanation, and order.
             </Text>
+
             <TextInput
               value={quizJson}
-              onChangeText={setQuizJson}
+              onChangeText={handleQuizJsonChange}
               placeholder={`[
   {
     "question": "What is the main topic?",
@@ -497,10 +515,29 @@ export default function AddContentScreen() {
 ]`}
               multiline
               numberOfLines={8}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 bg-white font-mono text-sm"
+              className={`w-full px-4 py-3 border rounded-lg text-gray-900 bg-white font-mono text-sm ${
+                quizJsonValid === false
+                  ? 'border-red-300 bg-red-50'
+                  : quizJsonValid === true
+                  ? 'border-green-300 bg-green-50'
+                  : 'border-gray-300'
+              }`}
               placeholderTextColor="#9CA3AF"
               textAlignVertical="top"
             />
+
+            {/* Validation Messages */}
+            {quizJsonError && (
+              <View className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                <Text className="text-red-700 text-sm font-medium">❌ {quizJsonError}</Text>
+              </View>
+            )}
+
+            {quizJsonValid && !quizJsonError && (
+              <View className="mt-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                <Text className="text-green-700 text-sm font-medium">✅ Valid JSON with {JSON.parse(quizJson).length} question(s)</Text>
+              </View>
+            )}
           </View>
 
           {/* Sources Section */}
