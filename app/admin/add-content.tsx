@@ -30,6 +30,8 @@ export default function AddContentScreen() {
     { title: '', url: '', type: 'article', author: '', publishedDate: '' }
   ]);
   const [quizJson, setQuizJson] = useState('');
+  const [quizJsonError, setQuizJsonError] = useState<string | null>(null);
+  const [quizJsonValid, setQuizJsonValid] = useState<boolean | null>(null);
 
   // File handling
   const [selectedAudioFile, setSelectedAudioFile] = useState<DocumentPicker.DocumentPickerResult | null>(null);
@@ -136,12 +138,17 @@ export default function AddContentScreen() {
   };
 
   const validateQuizJson = (jsonString: string): { isValid: boolean; error?: string; parsed?: any } => {
+    console.log('🧩 validateQuizJson called with:', jsonString.length, 'characters');
+
     if (!jsonString.trim()) {
+      console.log('🧩 Empty quiz JSON, returning valid');
       return { isValid: true }; // Quiz is optional
     }
 
     try {
+      console.log('🧩 Attempting to parse JSON...');
       const parsed = JSON.parse(jsonString);
+      console.log('🧩 JSON parsed successfully:', parsed);
 
       if (!Array.isArray(parsed)) {
         return { isValid: false, error: 'Quiz must be an array of questions' };
@@ -168,7 +175,11 @@ export default function AddContentScreen() {
 
       return { isValid: true, parsed };
     } catch (error) {
-      return { isValid: false, error: 'Invalid JSON format' };
+      const errorMessage = error instanceof Error ? error.message : 'Invalid JSON format';
+      return {
+        isValid: false,
+        error: `JSON parsing error: ${errorMessage}. Please check for missing brackets, trailing commas, or syntax errors.`
+      };
     }
   };
 
@@ -179,8 +190,12 @@ export default function AddContentScreen() {
     if (!selectedAudioFile) return { isValid: false, error: 'Audio file is required' };
 
     // Validate quiz JSON if provided
+    console.log('🧩 Validating quiz JSON:', quizJson.length > 0 ? 'Has content' : 'Empty');
     const quizValidation = validateQuizJson(quizJson);
+    console.log('🧩 Quiz validation result:', quizValidation);
+
     if (!quizValidation.isValid) {
+      console.log('❌ Quiz validation failed:', quizValidation.error);
       return { isValid: false, error: `Quiz validation error: ${quizValidation.error}` };
     }
 
@@ -188,22 +203,32 @@ export default function AddContentScreen() {
   };
 
   const handleSubmit = async () => {
+    console.log('🚀 Create podcast button clicked');
+
     // Validate form
+    console.log('🔍 Validating form...');
     const validation = validateForm();
+    console.log('🔍 Validation result:', validation);
+
     if (!validation.isValid) {
+      console.log('❌ Validation failed:', validation.error);
       Alert.alert('Validation Error', validation.error);
       return;
     }
 
     if (!selectedAudioFile?.assets?.[0]) {
+      console.log('❌ No audio file selected');
       Alert.alert('Error', 'Please select an audio file');
       return;
     }
 
     if (!user?.email) {
+      console.log('❌ No user email found');
       Alert.alert('Error', 'User email not found');
       return;
     }
+
+    console.log('✅ All validations passed, starting submission...');
 
     setIsSubmitting(true);
     setSubmitProgress({ step: 'validation', message: 'Validating form data...' });
