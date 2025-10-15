@@ -8,6 +8,15 @@ const CLOUDINARY_CONFIG = {
   upload_url: `https://api.cloudinary.com/v1_1/${Constants.expoConfig?.extra?.cloudinaryCloudName}/upload`,
 };
 
+// Debug: Log configuration at startup
+console.log('🚀 Cloudinary service initialized with config:', {
+  cloud_name: CLOUDINARY_CONFIG.cloud_name || 'MISSING',
+  api_key: CLOUDINARY_CONFIG.api_key ? 'SET' : 'MISSING',
+  api_secret: CLOUDINARY_CONFIG.api_secret ? 'SET' : 'MISSING',
+  hasExpoConfig: !!Constants.expoConfig,
+  hasExtra: !!Constants.expoConfig?.extra,
+});
+
 export interface CloudinaryUploadResult {
   public_id: string;
   secure_url: string;
@@ -26,11 +35,15 @@ export interface AudioUploadOptions {
 
 class CloudinaryService {
   private isConfigured(): boolean {
-    return !!(
-      CLOUDINARY_CONFIG.cloud_name &&
-      CLOUDINARY_CONFIG.api_key &&
-      CLOUDINARY_CONFIG.api_secret
-    );
+    console.log('🔍 Cloudinary config check:', {
+      cloud_name: CLOUDINARY_CONFIG.cloud_name,
+      api_key: CLOUDINARY_CONFIG.api_key ? 'SET' : 'MISSING',
+      api_secret: CLOUDINARY_CONFIG.api_secret ? 'SET' : 'MISSING',
+      upload_url: CLOUDINARY_CONFIG.upload_url
+    });
+
+    // For unsigned uploads, we only need the cloud name
+    return !!(CLOUDINARY_CONFIG.cloud_name);
   }
 
   /**
@@ -54,20 +67,34 @@ class CloudinaryService {
     }
 
     try {
-      console.log('Uploading audio to Cloudinary...', { fileUri });
+      console.log('Uploading audio to Cloudinary...', {
+        fileUri,
+        cloudName: CLOUDINARY_CONFIG.cloud_name,
+        uploadUrl: `https://api.cloudinary.com/v1_1/${CLOUDINARY_CONFIG.cloud_name}/upload`
+      });
 
       // Create FormData for upload
       const formData = new FormData();
 
-      // Add file
-      formData.append('file', {
-        uri: fileUri,
-        type: 'audio/mpeg', // Default to MP3
-        name: options.public_id ? `${options.public_id}.mp3` : 'audio.mp3',
-      } as any);
+      // Add file - handle web vs mobile differently
+      if (typeof window !== 'undefined') {
+        // Web environment - need to fetch the file and convert to blob
+        console.log('🌐 Web upload: converting file URI to blob...');
+        const response = await fetch(fileUri);
+        const blob = await response.blob();
+        const fileName = options.public_id ? `${options.public_id}.mp3` : 'audio.mp3';
+        formData.append('file', blob, fileName);
+      } else {
+        // React Native environment - use URI object
+        formData.append('file', {
+          uri: fileUri,
+          type: 'audio/mpeg',
+          name: options.public_id ? `${options.public_id}.mp3` : 'audio.mp3',
+        } as any);
+      }
 
       // Add upload parameters
-      formData.append('upload_preset', 'podcast_uploads'); // You'll need to create this preset
+      formData.append('upload_preset', 'podcast_uploads');
       formData.append('resource_type', 'video'); // Use 'video' for audio files
       formData.append('folder', options.folder || 'podcasts/audio');
 
@@ -75,14 +102,20 @@ class CloudinaryService {
         formData.append('public_id', options.public_id);
       }
 
+      console.log('🎵 Upload parameters:', {
+        upload_preset: 'podcast_uploads',
+        resource_type: 'video',
+        folder: options.folder || 'podcasts/audio',
+        public_id: options.public_id,
+        cloudName: CLOUDINARY_CONFIG.cloud_name
+      });
+
       const uploadUrl = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CONFIG.cloud_name}/upload`;
 
       const response = await fetch(uploadUrl, {
         method: 'POST',
         body: formData,
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+        // Don't set Content-Type header - let browser set it automatically for FormData
       });
 
       if (!response.ok) {
@@ -185,12 +218,22 @@ class CloudinaryService {
       // Create FormData for upload
       const formData = new FormData();
 
-      // Add file
-      formData.append('file', {
-        uri: fileUri,
-        type: 'image/jpeg',
-        name: options.public_id ? `${options.public_id}.jpg` : 'image.jpg',
-      } as any);
+      // Add file - handle web vs mobile differently
+      if (typeof window !== 'undefined') {
+        // Web environment - need to fetch the file and convert to blob
+        console.log('🌐 Web image upload: converting file URI to blob...');
+        const response = await fetch(fileUri);
+        const blob = await response.blob();
+        const fileName = options.public_id ? `${options.public_id}.jpg` : 'image.jpg';
+        formData.append('file', blob, fileName);
+      } else {
+        // React Native environment - use URI object
+        formData.append('file', {
+          uri: fileUri,
+          type: 'image/jpeg',
+          name: options.public_id ? `${options.public_id}.jpg` : 'image.jpg',
+        } as any);
+      }
 
       // Add upload parameters
       formData.append('upload_preset', 'podcast_uploads'); // Same preset as audio
@@ -206,6 +249,7 @@ class CloudinaryService {
       const response = await fetch(uploadUrl, {
         method: 'POST',
         body: formData,
+        // Don't set Content-Type header - let browser set it automatically for FormData
       });
 
       if (!response.ok) {
