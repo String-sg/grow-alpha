@@ -1,6 +1,6 @@
-// Temporarily using mock service until Cloudinary upload preset is configured
-import { mockCloudinaryService as cloudinaryService, type CloudinaryUploadResult } from './mockCloudinaryService';
-// import { cloudinaryService, type CloudinaryUploadResult } from './cloudinaryService';
+// Using real Cloudinary service for file uploads
+import { cloudinaryService, type CloudinaryUploadResult } from './cloudinaryService';
+// import { mockCloudinaryService as cloudinaryService, type CloudinaryUploadResult } from './mockCloudinaryService';
 import { podcastService, type CreatePodcastData } from './podcastService';
 import { quizService } from './quizService';
 import { userService } from './userService';
