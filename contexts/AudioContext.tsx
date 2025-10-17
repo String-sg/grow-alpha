@@ -191,10 +191,10 @@ export function AudioProvider({ children }: AudioProviderProps) {
           await Audio.setAudioModeAsync({
             allowsRecordingIOS: false,
             staysActiveInBackground: true,
-            interruptionModeIOS: Audio.INTERRUPTION_MODE_IOS_DO_NOT_MIX,
+            interruptionModeIOS: 1, // Do not mix
             playsInSilentModeIOS: true,
             shouldDuckAndroid: true,
-            interruptionModeAndroid: Audio.INTERRUPTION_MODE_ANDROID_DO_NOT_MIX,
+            interruptionModeAndroid: 1, // Do not mix
             playThroughEarpieceAndroid: false,
           });
         } else {
