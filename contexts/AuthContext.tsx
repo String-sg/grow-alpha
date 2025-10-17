@@ -20,7 +20,8 @@ const DEMO_USER = {
 const ADMIN_EMAILS = [
   'lee_kah_how@moe.edu.sg',
   'tay_hui_zhen_jasmine@moe.edu.sg',
-  'jeong_wondo@moe.edu.sg'
+  'jeong_wondo@moe.edu.sg',
+  'tan_wei_cheng_eric@moe.edu.sg',
 ];
 
 interface User {
@@ -339,7 +340,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     } catch (error: any) {
       console.error('Login error:', error);
-      
+
       if (error.message === 'INVALID_DOMAIN') {
         showWhitelistError();
       } else {
@@ -387,7 +388,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
-    
+
     // Redirect to Google OAuth
     window.location.href = authUrl;
   };
@@ -430,7 +431,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Handle OAuth callback (common for both web and mobile)
   const handleOAuthCallback = async (code: string) => {
     const codeVerifier = await AsyncStorage.getItem('code_verifier');
-    
+
     // Exchange code for tokens
     const tokenResponse = await AuthSession.exchangeCodeAsync(
       {
@@ -449,7 +450,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Get user info
     const userData = await getUserInfo(tokenResponse.accessToken);
-    
+
     // Store auth data
     await storeAuthData(
       tokenResponse.accessToken,
@@ -458,7 +459,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
 
     setUser(userData);
-    
+
     // Clear code verifier
     await AsyncStorage.removeItem('code_verifier');
   };
@@ -485,11 +486,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const urlParams = new URLSearchParams(window.location.search);
         const code = urlParams.get('code');
         const error = urlParams.get('error');
-        
+
         if (code) {
           // Clean up URL
           window.history.replaceState({}, document.title, window.location.pathname);
-          
+
           // Process the OAuth callback
           await handleOAuthCallback(code);
           return;
@@ -507,7 +508,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (accessToken[1] && userDataString[1]) {
         const userData = JSON.parse(userDataString[1]);
-        
+
         // Validate token (you might want to add token validation here)
         setUser(userData);
       } else if (isDemoMode) {
