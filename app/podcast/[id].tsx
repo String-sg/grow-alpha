@@ -182,7 +182,7 @@ export default function PodcastDetailsScreen() {
     isContentBuffering,
   } = useAudio();
 
-  const { currentPodcast: currentlyPlayingPodcast } = useAudioContext();
+  const { currentPodcast: currentlyPlayingPodcast, currentTime, duration, isPlaying, seekTo } = useAudioContext();
   const { getNotesForPodcast, createNote, updateNote, deleteNote } = useNotes();
 
   // Get topic colors based on content category
@@ -925,7 +925,6 @@ export default function PodcastDetailsScreen() {
             {/* Script Content */}
             {(() => {
               const script = getScriptByPodcastId(content.id);
-              const { currentTime, duration, isPlaying, seekTo } = useAudioContext();
               
               if (!script) {
                 return (
